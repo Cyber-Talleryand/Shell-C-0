@@ -15,8 +15,6 @@
 
 
 
-typedef int tItemL;
-
 
 
 #endif //PRO2_2021_P3_TYPES_H

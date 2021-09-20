@@ -9,6 +9,7 @@
 
 #include <stdio.h>
 #include "dynamic_list.h"
+#include <DYNAMIC_LIST_H>
 
 /*Para indicar las modificaciones con respecto al trabajo anterior, estas estarán indicadas con el sufijo "Mod R A"(Modificado Respecto al Anterior)*/
 
@@ -26,8 +27,8 @@ bool createNode (tPosL* p){
 }
 
 /*Tras comprobar si el nodo auxiliar ha sido creado correctamente, se posiciona el item en el lugar correspondiente.*/
-bool insertItem(tItemL d, tList* L ){
-    tPosL q, r;
+bool insertItem(char d[], tList* L ){
+    tPosL q;
     if(!createNode(&q)){
         return false;
     }
@@ -38,38 +39,20 @@ bool insertItem(tItemL d, tList* L ){
         /*Si la lista esta vacía se inserta el item en la primera posición.*/
         if(*L==LNULL) *L=q;
 
-            /*Si el elemento a introducir es mayor que el último de la lista, este se introduce al final*/
-        else if(strcmp(d.nickname,getItem(last(*L),*L).nickname)>0){
-            for(r=*L; r->next != LNULL; r=r->next);
-            r->next=q;
-        }
-            /*Si el elemento a introducir es menor que el primero de la lista, el puntero "next" le damos el valor
-             * del puntero inicial y renombramos como puntero incial al nuevo elemento*/
-        else if(strcmp(d.nickname,getItem(first(*L),*L).nickname)<0){
-            q->next=*L;
-            *L=q;
-        }
-            /*Si no se cumple nada de lo anterior, recorremos la lista hasta que encontremos el elemento mayor(r) que el introducido en la función.
-             *Después modificamos para que nuestro nuevo elemento(q), su variable "next", apunte al siguiente elemento al mayor(r) y que el "next"
-             * de este último(r) apunte al nuevo elemento(q)*/
         else{
-            for(r=*L;r!=LNULL && strcmp(getItem(next(r,*L),*L).nickname,d.nickname)<0;r=r->next);
-            q->next=r->next;
-            r->next=q;
+            last(*L)->next=q;
         }
         return true;
     }
 }
 
 /*Se va a la posicion introducida para modificar el elemento que queremos.*/
-void updateItem(tItemL d , tPosL p, tList* L){
+void updateItem(char d[], tPosL p){
     p->data=d;
-
-
 }
 
 /*Se recorre la lista para encontrar el elemento requerido.*/
-tPosL findItem(tNickname d, tList L) {
+tPosL findItem(char d[], tList L) {
 
     tPosL p = L;
     /*Se comprueba si la lista está vacía, en caso afirmativo  */
@@ -78,17 +61,17 @@ tPosL findItem(tNickname d, tList L) {
         //Se comprueba que el elemento siguiente al actual no sea nulo para simplificar la ejecución de la búsqueda
         if (p->next != LNULL) {
             //Se recorre toda la lista buscando el elemento que coincida
-            for(p=L;p != LNULL && strcmp(p->data.nickname, d) != 0;p=p->next);
+            for(p=L;p != LNULL && strcmp(p->data, d) != 0;p=p->next);
             //Se comprueba si se ha llegado al final de la lista, en caso afirmativo se devuelve "nulo"
             if (p != LNULL) {
                 //Se comprueba si la posición obtenida si lo que contiene concuerda con lo que estamos buscando
-                if (strcmp(p->data.nickname, d) == 0)return p;
+                if (strcmp(p->data, d) == 0)return p;
                 //en caso contrario se devuelve  que la posición es "nula"
                 else return LNULL;
             } else return LNULL;
         }
         //Si solo hay un elemento en la lista se comprueba si este es el que buscamos
-        else if (strcmp(p->data.nickname, d) == 0) return p;
+        else if (strcmp(p->data, d) == 0) return p;
         //En caso de no cumplirse nada de lo anterior se devuelve posición nula
         else return LNULL;
     }
@@ -101,8 +84,8 @@ bool isEmptyList(tList L){
 }
 
 /*Se escoge el elemento de la posición introducida.*/
-tItemL getItem(tPosL p, tList L){
-    if (p!=LNULL) return p->data;
+char* getItem(tPosL p, tList L){
+    if (!isEmptyList(L)) return p->data;
 }
 
 /*Devuelve la posición del primer elemento de la lista.*/
@@ -135,45 +118,41 @@ tPosL previous(tPosL p, tList L){
 }
 
 /*Devuelve el siguiente elemento de la lista.*/
-tPosL next(tPosL p, tList L){
+tPosL next(tPosL p){
     if(p!=LNULL)return p->next;
     return LNULL;
 }
 
-/*Libera la memoria que ocupa una posición de la lista.*/
-void deleteAtPosition(tPosL p, tList* L) {
-    tPosL q;
-    /*Si la posición que se quiere borrar es la primera, el siguiente elemento pasa a ser el primero.*/
-    if (p != LNULL) {
-        if (p == *L) *L = (*L)->next;
-            /*Si la posición que se quiere borrar es la ultima, se recorre toda la lista hasta llegar al penuntimo elemento
-            y ponerle el nodo nulo para desvincularlo del último que estaba anteriormente.*/
-        else if (p->next == LNULL) {
-            for (q = *L; q->next != p; q = q->next);
-            q->next = LNULL;
-        }
-            /*Si no se cumple nada de  lo anterior, se desvincula la posición que queremos borrar de la lista y se vinculan
-            las posiciones que estaban unidas a este.*/
-        else {
-            for(q=*L;q!=LNULL && q->next!=p;q=q->next);
-            q->next=p->next;
-        }
-        free(p);
-    }
-}
 
 
 /*Libera la memoria que ocupa la lista si no está vacía*/
-void deleteList(tList* L){
+void deleteList(tList* L, bool a){
     tPosL p;
     /*Recorre toda la lista por punteros eliminando cada uno de ellos teniendo en cuenta que el último valor alcanzado de
      * "*L" es "nulo" y por ello no es necesario eliminarlo y además queda con el valos que indica que la lista está vacía,
      * no siendo necesario el comando createEmptyList para darle los valores correctos*/
-    while(*L!=LNULL){
-        p=*L;
-        *L=(*L)->next;
-        free(p);
+    if(a){
+        while(*L!=LNULL){
+            p=*L;
+            *L=(*L)->next;
+            free(p);
+        }
+    }
+    else{
+        while(next(*L)!=LNULL){
+            p=*L;
+            *L=(*L)->next;
+            free(p);
+        }
+        *L=p;
+    }
+};
+
+void print_list(tList L,int i){
+    tPosL aux; int a=0;
+    for(aux=L;aux!=LNULL && a<i;aux=aux->next){
+        printf("%s\n",aux->data);
+        a++;
     }
 
-
-};
+}
