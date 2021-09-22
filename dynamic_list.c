@@ -9,7 +9,6 @@
 
 #include <stdio.h>
 #include "dynamic_list.h"
-#include <DYNAMIC_LIST_H>
 
 /*Para indicar las modificaciones con respecto al trabajo anterior, estas estarán indicadas con el sufijo "Mod R A"(Modificado Respecto al Anterior)*/
 
@@ -33,7 +32,7 @@ bool insertItem(char d[], tList* L ){
         return false;
     }
     else{
-        q->data= d;
+        strcpy(q->data,d);
         q->next= LNULL;
 
         /*Si la lista esta vacía se inserta el item en la primera posición.*/
@@ -46,10 +45,7 @@ bool insertItem(char d[], tList* L ){
     }
 }
 
-/*Se va a la posicion introducida para modificar el elemento que queremos.*/
-void updateItem(char d[], tPosL p){
-    p->data=d;
-}
+
 
 /*Se recorre la lista para encontrar el elemento requerido.*/
 tPosL findItem(char d[], tList L) {
@@ -98,6 +94,7 @@ tPosL last(tList L){
     tPosL p;
     // se comprueba si la lista está vacía
     if (isEmptyList(L))return LNULL;
+
     //Posteriormente se recorre la lista hasta alcanzar el último elemento
     for (p = L;  p->next != LNULL; p = p->next);
     return p;
@@ -117,11 +114,6 @@ tPosL previous(tPosL p, tList L){
     }
 }
 
-/*Devuelve el siguiente elemento de la lista.*/
-tPosL next(tPosL p){
-    if(p!=LNULL)return p->next;
-    return LNULL;
-}
 
 
 
@@ -139,7 +131,7 @@ void deleteList(tList* L, bool a){
         }
     }
     else{
-        while(next(*L)!=LNULL){
+        while((*L)->next!=LNULL){
             p=*L;
             *L=(*L)->next;
             free(p);

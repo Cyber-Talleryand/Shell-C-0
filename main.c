@@ -1,13 +1,23 @@
 /*Cosas que quedan por hacer
  *
  * ayuda[cmd}
- * Implementacion listas -> Historial
+ * pasar argumentos
  * Carpeta
- * Comprobar que se cumples las condiciones iniciales del bucle (son 5)
+ * Comprobar que se cumples las condiciones iniciales del bucle (son 5) del paper
  * */
 /*
- * Dudas: Es necesario que los comandos y los argumentos sean procesados en el bucle principal?
- * Es necesario que se cunpla el orden de ejecucion propuesto en el bucle?
+ * Problemas que quedas por solucionar de esta implementacion
+ * -Exact_arg
+ *
+ * Apreciaciones sobre cosas que vas a tener que cambiar
+ * Tu propusiste dos comandos para dynamic_list.c
+ * Savelist y transferlist. Quiero decir que modifiques esos archivos si ves que necesitas algo adicional
+ *
+ * Comandos a modificar por tu parte principalmente
+ * obt_comm
+ * search_comm
+ * exact_comm
+ * exact_arg(este no funciona)
  * */
 
 
@@ -22,6 +32,7 @@
 
 
 #define MAX_COMM 600
+#define MAX_AUX_COMM 20
 #define ERR_INT -1
 #define ERR_CHAR '$'
 
@@ -30,28 +41,28 @@
 
 void obt_com(char *an_str) {
     char c;
-    bool status;
+    bool status_comm=true;
     int i = 0;
     printf("\n>>");
     do {
         c = getchar();
-        if (i >= MAX_COMM && (c == EOF || c == '\n')) {
-            status = false;
+        if (i >= MAX_COMM || c == EOF || c == '\n') {
+            status_comm = false;
             an_str[i] = '\0';
         } else {
             an_str[i] = c;
             i++;
         }
-    } while (status);
+    } while (status_comm);
 
 }
 
 
 int search_arg(char *an_str){
-    int i;
-    for(i=0;i<MAX_COMM && an_str[i]!=' ';i++);
+    int i=0;
+    for(i=0;i<MAX_COMM && an_str[i]!=' ' && an_str[i]!='\0';i++);
     if(i==0) return 0;
-    else if(i<MAX_COMM && i>0 && an_str[i+1]!=' ')return i;
+    else if(i<MAX_COMM && i>0 && an_str[i+1]==' ')return i;
     else return ERR_INT;
 }
 /*
@@ -62,13 +73,25 @@ int search_next_arg(char *an_str, int f){
     if(i<MAX_COMM)return i;
     else return ERR_INT;
 }
-*/
+
 void exact_comm(char *an_str,char *dev){
     int i,cont;
-    for(i=0;i<MAX_COMM && an_str[i]!=' ';i++);
+    for(i=0;i<MAX_COMM  && an_str[i]!='\0'&& an_str[i]!='\n';i++);
     for(cont=0;cont<=i;cont++){
         dev[cont]=an_str[cont];
     }
+    dev[cont+1]='\n';
+
+}
+*/
+void exact_comm(char an_str[],char *dev){
+    int i,cont;
+    for(i=0;i<MAX_COMM  && an_str[i]!='\0'&& an_str[i]!='\n' && an_str[i]!=' ';i++);
+    for(cont=0;cont<=i;cont++){
+        dev[cont]=an_str[cont];
+    }
+    dev[cont+1]='\n';
+
 }
 char exact_arg(char *an_str,int i){
     if(i==ERR_INT) return ERR_CHAR;
@@ -114,8 +137,8 @@ int pid(char *str){
     pid_t process_id;
     i=search_arg(str);aux=exact_arg(str,i);
     if(aux=='p')    printf("Parent_PID Terminal: %d\n",getppid());
-    else if (aux==ERR_CHAR) printf("Argument incorrect (check the documentation)");
-    else printf("PID Terminal: %d\n",getpid());
+    else if (aux==ERR_CHAR)  printf("PID Terminal: %d\n",getpid());
+    else printf("Argument incorrect (check the documentation)");
 
 
     return 0;
@@ -133,28 +156,48 @@ void historial(char *str,tList *L){
 
 
 }
+void ayuda_pid(){
+    printf("Muestra el PID del programa\n En caso de pasar el parámetro -p se muestra el del proceso padre");
+}
+void ayuda_autores(){
+    printf("Muestra los datos de los autores\n\"-l\"para solo ver los correos\n\"-n\" para solo los nombres de los creadores");
+}
+void ayuda_fecha(){
+    printf("Muestra la fecha y la hora del sistema por defecto\n\"-d\" para solo ver la fecha\n\"-d\"");
+}
 void ayuda(char *str){
     int i; char aux;
     i=search_arg(str);aux=exact_arg(str,i);
-
+    if(strcmp(aux,"pid")==0) ayuda_pid();
+    if(strcmp(aux,"autores")==0) ayuda_autores;
+    if(strcmp(aux,"fecha")==0) ayuda_fecha();
+    if(strcmp(aux,"infosis")==0) ayuda_infosis();
+    if(strcmp(aux,"getpwd")==0) ayuda_getpwd();
+    if(strcmp(aux,"hist")==0) ayuda_historial;
+    if(strcmp(aux,"ayuda")==0) ayuda_ayuda();
+    if(strcmp(aux,"carpeta")==0) ayuda_carpeta();
+    if (strcmp(aux, "fin")==0 || strcmp(aux, "salir")==0 || strcmp(aux, "bye")==0) ayuda_salir;
 }
 
 
 bool an_comm(char *echo,tList *L){
-    char *comm;
-    exact_comm(&echo[0],comm);
-    if(strcmp(&comm,"pid")==0) pid(echo);
-    if(strcmp(&comm,"autores")==0) autores(echo);
-    if(strcmp(&comm,"fecha")==0) fecha(echo);
-    if(strcmp(&comm,"infosis")==0) infosis();
-    if(strcmp(&comm,"getpwd")==0) getpwd();
-    if(strcmp(&comm,"hist")==0) historial(echo,L);
-    if(strcmp(&comm,"ayuda")==0) ayuda(echo);
-    if (!strcmp(comm, "fin")==0 || !strcmp(comm, "salir")==0 || !strcmp(comm, "bye")==0) return false;
-    else return true;
+    char *aux[MAX_AUX_COMM];
+
+//    tList X=*L;
+    exact_comm(echo,aux[0]);
+    if(strcmp(aux,"pid")==0) pid(echo);
+    if(strcmp(aux,"autores")==0) autores(echo);
+    if(strcmp(aux,"fecha")==0) fecha(echo);
+    if(strcmp(aux,"infosis")==0) infosis();
+    if(strcmp(aux,"getpwd")==0) getpwd();
+    if(strcmp(aux,"hist")==0) historial(echo,L);
+    if(strcmp(aux,"ayuda")==0) ayuda(echo);
+    if (strcmp(aux, "fin")==0 || strcmp(aux, "salir")==0 || strcmp(aux, "bye")==0) return false;
+    return true;
 
 }
 //Todo finalizado hasta aquí
+
 /*
 int carpeta (char PATH){
 
@@ -182,10 +225,12 @@ int TrocearCadena(char * cadena, char ** trozos){
 }
 
 
+
+
 int main(){
     char c,comm[MAX_COMM];
-    tList *hist;
-    createEmptyList(hist);
+    tList hist,reserva;
+    createEmptyList(&hist);
 
 
     char** troceado;
@@ -195,14 +240,20 @@ int main(){
 
     char echo[MAX_COMM],*cwd= malloc(MAX_COMM* sizeof(char));
         do {
-            obt_com(&echo[0]);
-            insertItem(echo,hist);
-            status=an_comm(echo,hist);
+ //           obt_com(&echo[0]);
+            strcpy(echo,"pid -p");
+            insertItem(echo,&hist);
+            status=an_comm(echo,&hist);
+            /*Al pasar el comando anterior se cambia el valor de lastItem->next de (0x00) a (0xa00) produciendo errores*/
+            printf("\n");
         }while(status);
-    deleteList(hist,true);
+    deleteList(&hist,true);
 
 
-    } /*
+    }
+
+
+    /*
             getpwd(cwd);
             printf("\n%s>> ", cwd);
             fgets(echo, 59, stdin);

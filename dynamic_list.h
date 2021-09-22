@@ -25,7 +25,7 @@ typedef struct tNode* tPosL;                        //Declaración de un tipo de
 typedef tPosL tList;                                //Declaración de un tipo de dato denominado "tList", de tipo "struct tNode*".
 
 struct tNode{                                       //Declaración de una estructura con una variable "struct(tItemL)" denominada "data" y otra
-    char* data;                                    //variable "tPosL" que es un puntero a un nodo denominado "next".
+    char data[MAXTAML];                                    //variable "tPosL" que es un puntero a un nodo denominado "next".
     tPosL next;};
 
 
