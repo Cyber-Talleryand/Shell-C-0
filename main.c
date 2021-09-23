@@ -161,11 +161,6 @@ void historial(char *str,tList *L){
     }
 }
 
-void comando(char *str, tList *L){
-    tPosL p;
-    p=findItem(str,*L);
-    printf("*%s");
-}
 void ayuda_comando(){
     printf("Reutiliza el comando del historial correspodiente al número intrducido");
 }
@@ -212,8 +207,16 @@ void ayuda(char *str){
 }
 
 
+tPosL comando(char *str, tList *L){
+    tPosL p;
+    p=findItem(str,*L);
+    printf("*%s",p->data);
+    return p;
+}
+
 bool an_comm(char *echo,tList *L){
     char *aux[MAX_AUX_COMM];
+    tPosL p;
 
 //    tList X=*L;
     exact_comm(echo,aux[0]);
@@ -224,11 +227,20 @@ bool an_comm(char *echo,tList *L){
     if(strcmp(aux,"getpwd")==0) getpwd();
     if(strcmp(aux,"hist")==0) historial(echo,L);
     if(strcmp(aux,"ayuda")==0) ayuda(echo);
-    if(strcmp(aux,"comando")==0) comando(echo,L);
+    if(strcmp(aux,"comando")==0){
+        char aux2;
+        p=comando(echo,L);
+        exact_comm(p->data,&aux2);
+        if(strcmp(aux2,"comando")!=0)an_comm(p->data,L);
+        else{
+            printf("Estás intentando reutilizar un \"comando\" o cual puede romper el programa");
+        }
+    }
     if (strcmp(aux, "fin")==0 || strcmp(aux, "salir")==0 || strcmp(aux, "bye")==0) return false;
     return true;
 
 }
+
 //Todo finalizado hasta aquí
 
 /*
