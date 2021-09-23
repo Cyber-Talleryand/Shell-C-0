@@ -111,8 +111,14 @@ void getpwd(){
 void autores(char *str){
     int i; char aux;
     i=search_arg(str);aux= exact_arg(str,i);
-    if (aux!='l') printf("Rodrigo Dantes Gonzalez Mantuano");
-    if (aux!='n') printf("r.d.gmantuano@udc.es");
+    if (aux!='l'){
+        printf("Rodrigo Dantes Gonzalez Mantuano");
+        printf("David Álvarez Celemín");
+    }
+    if (aux!='n'){
+        printf("r.d.gmantuano@udc.es");
+        printf("david.alvarez.celemin@udc.es");
+    }
 }
 
 int fecha(char *str){
@@ -153,8 +159,15 @@ void historial(char *str,tList *L){
         i=atoi(&aux);
         print_list(*L,i);
     }
+}
 
-
+void comando(char *str, tList *L){
+    tPosL p;
+    p=findItem(str,*L);
+    printf("*%s");
+}
+void ayuda_comando(){
+    printf("Reutiliza el comando del historial correspodiente al número intrducido");
 }
 void ayuda_pid(){
     printf("Muestra el PID del programa\n En caso de pasar el parámetro -p se muestra el del proceso padre");
@@ -172,8 +185,18 @@ void ayuda_getpwd(){
     printf("Muestra el directorio actual de ejecución de la shell");
 }
 void ayuda_historial(){
-    printf("Muestra los comandos utilizados anteriormente");
+    printf("Muestra los comandos utilizados anteriormente\n\"-N\" Muestra solo los N primero elementos \n\"-c\"Resetea la tabla");
 }
+void ayuda_ayuda(){
+    printf("Muestra la documentación de los comandos");
+}
+void ayuda_carpeta(){
+    printf("Redirige el shell del directorio actual al directorio destino");
+}
+void ayuda_salir(){
+    printf("Saca al usuario de la shell");
+}
+
 void ayuda(char *str){
     int i; char aux;
     i=search_arg(str);aux=exact_arg(str,i);
@@ -201,6 +224,7 @@ bool an_comm(char *echo,tList *L){
     if(strcmp(aux,"getpwd")==0) getpwd();
     if(strcmp(aux,"hist")==0) historial(echo,L);
     if(strcmp(aux,"ayuda")==0) ayuda(echo);
+    if(strcmp(aux,"comando")==0) comando(echo,L);
     if (strcmp(aux, "fin")==0 || strcmp(aux, "salir")==0 || strcmp(aux, "bye")==0) return false;
     return true;
 
