@@ -12,6 +12,8 @@
  * Apreciaciones sobre cosas que vas a tener que cambiar
  * Tu propusiste dos comandos para dynamic_list.c
  * Savelist y transferlist. Quiero decir que modifiques esos archivos si ves que necesitas algo adicional
+ * Psdt: Me acabo de acordar que necesitas un comando para printear la  lista y ten en cuenta que la printeamos
+ * con una cabecera que no se guarda en el comando (documentación)
  *
  * Comandos a modificar por tu parte principalmente
  * obt_comm
@@ -210,7 +212,7 @@ void ayuda(char *str){
 tPosL comando(char *str, tList *L){
     tPosL p;
     p=findItem(str,*L);
-    printf("*%s",p->data);
+    printf("(*) %s",p->data);
     return p;
 }
 
@@ -233,7 +235,7 @@ bool an_comm(char *echo,tList *L){
         exact_comm(p->data,&aux2);
         if(strcmp(aux2,"comando")!=0)an_comm(p->data,L);
         else{
-            printf("Estás intentando reutilizar un \"comando\" o cual puede romper el programa");
+            printf("Estás intentando reutilizar un \"comando\" lo cual puede romper el programa");
         }
     }
     if (strcmp(aux, "fin")==0 || strcmp(aux, "salir")==0 || strcmp(aux, "bye")==0) return false;
