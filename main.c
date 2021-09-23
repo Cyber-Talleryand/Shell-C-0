@@ -165,6 +165,15 @@ void ayuda_autores(){
 void ayuda_fecha(){
     printf("Muestra la fecha y la hora del sistema por defecto\n\"-d\" para solo ver la fecha\n\"-d\"");
 }
+void ayuda_infosis(){
+    printf("Muestra la información del sistema operativo\n");
+}
+void ayuda_getpwd(){
+    printf("Muestra el directorio actual de ejecución de la shell");
+}
+void ayuda_historial(){
+    printf("Muestra los comandos utilizados anteriormente");
+}
 void ayuda(char *str){
     int i; char aux;
     i=search_arg(str);aux=exact_arg(str,i);
