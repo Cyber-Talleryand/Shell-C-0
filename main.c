@@ -148,9 +148,9 @@ int autores(char *str){
 int fecha(char *str){
     time_t t = time(NULL);
     struct tm tm = *localtime(&t);
-    if(strcmp(str,"-d")!=0)printf("%d-%02d-%02d \n", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday);
-    else if(strcmp(str,"-l")!=0)printf("%02d:%02d:%02d",tm.tm_hour, tm.tm_min, tm.tm_sec);
-    else if(strcmp(str,FIN_COMM)==0)printf();
+    if(strcmp(str,"-d")==0)printf("%d-%02d-%02d \n", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday);
+    else if(strcmp(str,"-l")==0)printf("%02d:%02d:%02d",tm.tm_hour, tm.tm_min, tm.tm_sec);
+    else if(strcmp(str,FIN_COMM)==0)printf("%d-%02d-%02d %02d:%02d:%02d\n", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday,tm.tm_hour, tm.tm_min, tm.tm_sec);
     return 0;
 }
 
@@ -183,6 +183,10 @@ int historial(char *str,tList *L){
         print_list(*L, i);
     }
     return 0;
+}
+
+int carpeta (char *PATH){
+    if(chdir(*PATH)!=0) printf("Directorio no válido");
 }
 
 void ayuda_comando(){
@@ -264,6 +268,7 @@ bool an_comm(tList L, tList *historia){
     if(strcmp(aux,"getpwd")==0) a=getpwd();
     if(strcmp(aux,"hist")==0) a=historial(L->next->data,historia);
     if(strcmp(aux,"ayuda")==0) a=ayuda(L->next->data);
+    if(strcmp(aux,"carpeta")==0) a=carpeta(L->next->data);
  /*   if(strcmp(aux,"comando")==0){
         char aux2;
         p=comando(L->next->data, *historia);
@@ -284,16 +289,6 @@ bool an_comm(tList L, tList *historia){
 
 //Todo finalizado hasta aquí
 
-/*
-int carpeta (char *PATH){
-    if(PATH exists)return chdir(PATH);
-    else if(getpwd(&PATH)) chdir(PATH);
-    else{
-        printf("Unexpeted error, Path not found pr dissappeared");
-        return 5;
-    }
-}
-*/
 
 
 //Devuelve el tamaño de la string en palabras

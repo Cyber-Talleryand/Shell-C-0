@@ -152,12 +152,15 @@ void print_lista(tList L){
     }
 }
 
-void inPrintList(tList L,char c[]){
-
+void inPrintList(tList L,char c[MAXTAML]){
+    int i=0;
     tPosL aux;
     strcpy(c,L->data);
     for(aux=L->next;aux!=LNULL && strcmp(aux->data,"-0")!=0;aux=aux->next){
+        for(;i<MAXTAML && c[i]!='\0';i++);
+        c[i]=' ';
         strcat(c, aux->data);
+
     }
 }
 
@@ -170,6 +173,7 @@ void multitouni(tList *L){
     insertItem(M->data,L);
     for(aux=M->next;aux!=LNULL;aux=aux->next){
         strcat((*L)->data, aux->data);
+        strcat((*L)->data," ");
     }
 
 
