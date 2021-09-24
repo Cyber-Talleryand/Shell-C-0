@@ -1,12 +1,3 @@
-/*
- * TITLE: PROGRAMMING II LABS
- * SUBTITLE: Practical 3
- * AUTHOR 1: Rodrigo Dantés González Mantuano LOGIN 1: r.d.gmantuano@udc.es
- * AUTHOR 2: Angel Varela Sánchez LOGIN 2: angel.varela.sanchez@udc.es
- * GROUP: 1.4
- * DATE: 25/06/21
- */
-
 #include <stdio.h>
 #include "dynamic_list.h"
 
@@ -62,13 +53,13 @@ tPosL findItem(char d[], tList L) {
             if (p != LNULL) {
                 //Se comprueba si la posición obtenida si lo que contiene concuerda con lo que estamos buscando
                 if (strcmp(p->data, d) == 0)return p;
-                //en caso contrario se devuelve  que la posición es "nula"
+                    //en caso contrario se devuelve  que la posición es "nula"
                 else return LNULL;
             } else return LNULL;
         }
-        //Si solo hay un elemento en la lista se comprueba si este es el que buscamos
+            //Si solo hay un elemento en la lista se comprueba si este es el que buscamos
         else if (strcmp(p->data, d) == 0) return p;
-        //En caso de no cumplirse nada de lo anterior se devuelve posición nula
+            //En caso de no cumplirse nada de lo anterior se devuelve posición nula
         else return LNULL;
     }
 }
@@ -136,7 +127,6 @@ void deleteList(tList* L, bool a){
             *L=(*L)->next;
             free(p);
         }
-        *L=p;
     }
 };
 
@@ -146,5 +136,41 @@ void print_list(tList L,int i){
         printf("%s\n",aux->data);
         a++;
     }
+}
+/*
+bool copyList(tList L, tList *M){
+    tPosL p
+    for(p=M;p!=NULL;p=p.next){
+        if
+    }
+}
+*/
+void print_lista(tList L){
+    tPosL aux;
+    for(aux=L;aux!=LNULL;aux=aux->next){
+        printf("%s\n",aux->data);
+    }
+}
+
+void inPrintList(tList L,char c[]){
+
+    tPosL aux;
+    strcpy(c,L->data);
+    for(aux=L->next;aux!=LNULL && strcmp(aux->data,"-0")!=0;aux=aux->next){
+        strcat(c, aux->data);
+    }
+}
+
+void multitouni(tList *L){
+    tList M;
+
+    tPosL aux;
+    deleteList(L,true);
+    createEmptyList(L);
+    insertItem(M->data,L);
+    for(aux=M->next;aux!=LNULL;aux=aux->next){
+        strcat((*L)->data, aux->data);
+    }
+
 
 }

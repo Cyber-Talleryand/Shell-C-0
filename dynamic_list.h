@@ -1,11 +1,3 @@
-/*
- * TITLE: PROGRAMMING II LABS
- * SUBTITLE: Practical 3
- * AUTHOR 1: Rodrigo Dantés González Mantuano LOGIN 1: r.d.gmantuano@udc.es
- * AUTHOR 2: Angel Varela Sánchez LOGIN 2: angel.varela.sanchez@udc.es
- * GROUP: 1.4
- * DATE: 25/06/21
- */
 #ifndef DYNAMIC_LIST_H          //Comprobamos si "DYNAMIC_LIST_H" no está definida.
 #define DYNAMIC_LIST_H          //Definición de una contante simbólica "DYNAMIC_LIST_H".
 
@@ -14,10 +6,7 @@
 #include <stdlib.h>             //Añadimos el contenido de la librería "stdlib.h".
 
 #define LNULL NULL              //Definición de una contante simbólica "LNULL" con valor nulo, es decir 0.
-#define MAXTAML 600
-
-
-/*Para indicar las modificaciones con respecto al trabajo anterior, estas estarán indicadas con el sufijo "Mod R A"(Modificado Respecto al Anterior)*/
+#define MAXTAML 100
 
 
 typedef struct tNode* tPosL;                        //Declaración de un tipo de dato denominado "tPosl", de tipo "struct tNode*".
@@ -26,7 +15,8 @@ typedef tPosL tList;                                //Declaración de un tipo de
 
 struct tNode{                                       //Declaración de una estructura con una variable "struct(tItemL)" denominada "data" y otra
     char data[MAXTAML];                                    //variable "tPosL" que es un puntero a un nodo denominado "next".
-    tPosL next;};
+    tPosL next;
+};
 
 
 
@@ -39,16 +29,18 @@ void updateItem(char d[] , tPosL p, tList* L);      //Modifica el contenido del 
 void deleteAtPosition(tPosL p, tList* L);           //Libera la memoria que ocupa una posición de la lista.
 void deleteList(tList* L,bool a);                          //Libera la memoria que ocupa la lista.
 tPosL findItem(char d[], tList L);               //Devuelve la posición del primer elemento de la lista cuyo nick de usuario
-                                                    // se corresponda con el indicado (o LNULL si no existe tal elemento).
+// se corresponda con el indicado (o LNULL si no existe tal elemento).
 bool isEmptyList(tList L);                          //Determina si la lista está vacía.
 char* getItem(tPosL p, tList L);                   //Devuelve el contenido del elemento de la lista que ocupa la posición indicada.
 tPosL first(tList L);                               //Devuelve la posición del primer elemento de la lista.
 tPosL last(tList L);                                //Devuelve la posición del último elemento de la lista.
 tPosL previous(tPosL p, tList L);                   //Devuelve la posición en la lista del elemento anterior al de la posición
-                                                    // indicada (o LNULL si la posición no tiene anterior).
+// indicada (o LNULL si la posición no tiene anterior).
 tPosL next(tPosL p, tList L);                       //Devuelve la posición en la lista del elemento siguiente al de la posición
-                                                    // indicada (o LNULL si la posición no tiene siguiente).
+// indicada (o LNULL si la posición no tiene siguiente).
 void print_list(tList L, int i);
-
+void print_lista(tList L);
+void inPrintList(tList L, char c[]);
+void multitouni(tList *L);
 
 #endif
