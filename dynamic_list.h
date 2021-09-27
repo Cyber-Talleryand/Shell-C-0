@@ -6,7 +6,7 @@
 #include <stdlib.h>             //Añadimos el contenido de la librería "stdlib.h".
 
 #define LNULL NULL              //Definición de una contante simbólica "LNULL" con valor nulo, es decir 0.
-#define MAXTAML 100
+#define MAXTAML 600
 
 
 typedef struct tNode* tPosL;                        //Declaración de un tipo de dato denominado "tPosl", de tipo "struct tNode*".
@@ -27,7 +27,7 @@ bool insertItem(char d[], tList* L);                //Se posiciona el item en el
 bool copyList(tList L, tList* M);                   //Pasa una copia de la lista copiada y la dirección de la lista a copiar.
 void updateItem(char d[] , tPosL p, tList* L);      //Modifica el contenido del elemento situado en la posición indicada.
 void deleteAtPosition(tPosL p, tList* L);           //Libera la memoria que ocupa una posición de la lista.
-void deleteList(tList* L,bool a);                          //Libera la memoria que ocupa la lista.
+void deleteList(tList* L);                          //Libera la memoria que ocupa la lista.
 tPosL findItem(char d[], tList L);               //Devuelve la posición del primer elemento de la lista cuyo nick de usuario
 // se corresponda con el indicado (o LNULL si no existe tal elemento).
 bool isEmptyList(tList L);                          //Determina si la lista está vacía.
@@ -40,7 +40,6 @@ tPosL next(tPosL p, tList L);                       //Devuelve la posición en 
 // indicada (o LNULL si la posición no tiene siguiente).
 void print_list(tList L, int i);
 void print_lista(tList L);
-void inPrintList(tList L, char c[]);
-void multitouni(tList *L);
+void inPrintList(tList L,char c[MAXTAML]);
 
 #endif

@@ -1,3 +1,7 @@
+/*
+ *David Álvarez Celemín
+ * Rodrigo González Mantuano
+ */
 #include <stdio.h>
 #include "dynamic_list.h"
 
@@ -109,32 +113,26 @@ tPosL previous(tPosL p, tList L){
 
 
 /*Libera la memoria que ocupa la lista si no está vacía*/
-void deleteList(tList* L, bool a){
+void deleteList(tList* L){
     tPosL p;
     /*Recorre toda la lista por punteros eliminando cada uno de ellos teniendo en cuenta que el último valor alcanzado de
      * "*L" es "nulo" y por ello no es necesario eliminarlo y además queda con el valos que indica que la lista está vacía,
      * no siendo necesario el comando createEmptyList para darle los valores correctos*/
-    if(a){
-        while(*L!=LNULL){
-            p=*L;
-            *L=(*L)->next;
-            free(p);
-        }
+
+    while(*L!=LNULL){
+        p=*L;
+        *L=(*L)->next;
+        free(p);
     }
-    else{
-        while((*L)->next!=LNULL){
-            p=*L;
-            *L=(*L)->next;
-            free(p);
-        }
-    }
+
 };
 
 void print_list(tList L,int i){
     tPosL aux; int a=0;
     for(aux=L;aux!=LNULL && a<i;aux=aux->next){
-        printf("%s\n",aux->data);
         a++;
+        printf("%d-> %s\n",a, aux->data);
+
     }
 }
 /*
@@ -154,13 +152,14 @@ void print_lista(tList L){
 
 void inPrintList(tList L,char c[MAXTAML]){
     int i=0;
+    char auxc[MAXTAML];
     tPosL aux;
     strcpy(c,L->data);
     for(aux=L->next;aux!=LNULL && strcmp(aux->data,"-0")!=0;aux=aux->next){
         for(;i<MAXTAML && c[i]!='\0';i++);
         c[i]=' ';
-        strcat(c, aux->data);
-
+        strcpy(auxc,aux->data);
+        strcat(c,auxc );
     }
 }
 
@@ -168,7 +167,7 @@ void multitouni(tList *L){
     tList M;
 
     tPosL aux;
-    deleteList(L,true);
+    deleteList(L);
     createEmptyList(L);
     insertItem(M->data,L);
     for(aux=M->next;aux!=LNULL;aux=aux->next){
