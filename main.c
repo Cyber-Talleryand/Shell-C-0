@@ -77,6 +77,7 @@ bool an_comm(tList L, tList *historia){
     if(strcmp(L->data,"ayuda")==0) a=ayuda(L->next->data);
     if(strcmp(L->data,"carpeta")==0) a=carpeta(L->next->data);
     if(strcmp(L->data,"crear")==0) a= crear_x(L->next);
+    if(strcmp(L->data,"listfich")==0) a= list_fich(L);
 
     if(strcmp(L->data,"comando")==0){
 
@@ -99,31 +100,6 @@ bool an_comm(tList L, tList *historia){
 
 }
 
-int crear_x(tList L){
-    FILE *fp;
-    if (strcmp(L->data,"-f")==0){
-        if((fp=fopen(L->next->data,"r"))!=NULL) {
-            printf("Cannot create that file, already exists");
-            fclose(fp);
-        }
-        //Posible perdida de puntero
-        else{
-            //fclose(fp);
-            if((fp=fopen(L->next->data,"w"))==NULL){
-                printf("Cannot create that file");
-            }
-            else fclose(fp);
-        }
-    }
-    else{
-        if (mkdir(L->data, 0777) == -1){
-            printf("Error al crear el directiorio");
-        }
-        else
-            printf("Directory created %s",L->data);
-    }
-    return 0;
-}
 
 
 int autores(char *str){
@@ -215,7 +191,6 @@ tPosL comando(char *str, tList L) {
 }
 
 
-
 int ayuda(char *str){
     if(strcmp(str,"pid")==0) ayuda_pid();
     if(strcmp(str,"autores")==0) ayuda_autores();
@@ -225,7 +200,7 @@ int ayuda(char *str){
     if(strcmp(str,"ayuda")==0) ayuda_ayuda();
     if(strcmp(str,"carpeta")==0) ayuda_carpeta();
     if(strcmp(str,"comando")==0) ayuda_comando();
-    if (strcmp(str, "fin")==0 || strcmp(str, "salir")==0 || strcmp(str, "bye")==0) ayuda_salir;
+    if (strcmp(str, "fin")==0 || strcmp(str, "salir")==0 || strcmp(str, "bye")==0) ayuda_salir();
     return 0;
 }
 void ayuda_comando(){
@@ -297,4 +272,159 @@ char * ConvierteModo (mode_t m, char *permisos)
     if (m&S_ISGID) permisos[6]='s';
     if (m&S_ISVTX) permisos[9]='t';
     return permisos;
+}
+
+int crear_x(tList L){
+    FILE *fp;
+    if (strcmp(L->data,"-f")==0){
+        if((fp=fopen(L->next->data,"r"))!=NULL) {
+            printf("Cannot create that file, already exists");
+            fclose(fp);
+        }
+            //Posible perdida de puntero
+        else{
+            //fclose(fp);
+            if((fp=fopen(L->next->data,"w"))==NULL){
+                printf("Cannot create that file");
+            }
+            else fclose(fp);
+        }
+    }
+    else{
+        if (mkdir(L->data, 0777) == -1){
+            printf("Error al crear el directiorio");
+        }
+        else
+            printf("Directory created %s",L->data);
+    }
+    return 0;
+}
+
+
+void printFileProperties(struct stat stats, char comm[]){
+    struct tm dt;
+    if(strcmp(FIN_COMM,comm)==0){
+        printf("\nFile size: %ld", stats.st_size);
+        return;
+    }
+
+    if(strcmp(comm,"-acc")==0){
+        // File modification time
+        dt = *(gmtime(&stats.st_mtime));
+        printf("\nModified on: %d-%d-%d %d:%d:%d", dt.tm_mday, dt.tm_mon, dt.tm_year + 1900,
+               dt.tm_hour, dt.tm_min, dt.tm_sec);
+    }
+    // Get file creation time in seconds and
+    // convert seconds to date and time format
+    if(strcmp(comm,"-long")==0){
+        dt = *(gmtime(&stats.st_ctime));
+        printf("\nCreated on: %d-%d-%d %d:%d:%d", dt.tm_mday, dt.tm_mon, dt.tm_year + 1900,
+               dt.tm_hour, dt.tm_min, dt.tm_sec);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        else if(strcmp(comm,"-link")==0){
+
+//      Solucion copiada
+//        long symlink_max;
+//        size_t bufsize;
+//        char *buf;
+//        ssize_t len;
+//
+//        errno = 0;
+//        symlink_max = pathconf("/usr/bin/", _PC_SYMLINK_MAX);
+//        if (symlink_max == -1) {
+//            if (errno != 0) {
+//                /* handle error condition */
+//            }
+//            bufsize = 10000;
+//        }
+//        else {
+//            bufsize = symlink_max+1;
+//        }
+//
+//        buf = (char *)malloc(bufsize);
+//        if (buf == NULL) {
+//            /* handle error condition */
+//        }
+//
+//        len = readlink("/usr/bin/perl", buf, bufsize);
+//        buf[len] = '\0';*/
+            char linkname[MAX_MID];
+            char cwd[MAX_MID];
+
+
+            if(getcwd(cwd,sizeof(cwd))!=NULL){
+                ssize_t r = readlink(cwd, linkname, MAX_MID);
+
+                if (r != -1) {
+                    linkname[r] = '\0';
+                    printf(" -> %s\n", linkname);
+                }
+                else
+                    putchar('\n');
+            }
+
+        }
+
+
+
+
+
+        printf("\nFile access: ");
+        if (stats.st_mode & R_OK)
+            printf("read ");
+        if (stats.st_mode & W_OK)
+            printf("write ");
+        if (stats.st_mode & X_OK)
+            printf("execute");
+
+        // File size
+        printf("\nFile size: %ld", stats.st_size);
+
+    }
+
+
+int list_fich(tList L){
+    tPosL p;
+    char aux[MAX_AUX_COMM]=FIN_COMM;
+    struct stat structstat;
+    //check optional parameters for the function
+    if(strcmp(L->data,FIN_COMM)==0) {
+        carpeta(L->data);
+        return 0;
+    }
+
+    if(L->data[0]=='-')strcpy(aux,L->data);
+
+    if(L->next->data[0]=='-') return 0;
+
+
+
+    for ( p=L;  p!=NULL && strcmp(p->data,FIN_COMM)!=0 ; p=p->next ) {
+        if( access( p->data, F_OK ) == 0 ) {
+            if(stat(p->data, &structstat)){
+                printf("%s",p->data);
+                printFileProperties(structstat,aux);
+            }
+        } else {
+            // file doesn't exist
+            // Q_P What we do if wrong option?
+        }
+        printf("\n");
+    }
+
 }
