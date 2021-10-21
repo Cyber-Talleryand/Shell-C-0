@@ -152,7 +152,6 @@ int carpeta (char str[]){
     }
     else if(chdir(str)==0){
         printf("Movido a %s",str);
-
     }
     else printf("Directorio no válido\n");
     return 0;
@@ -431,21 +430,37 @@ int list_dir_up(tList L, tList *temp){
     return 0;
 }
 
-void list_dir_bottom(struct stat structstat, tList *temp,char* name){
+void list_dir_bottom(struct stat structstat, tList *temp,char* name, char* carpeta){
     struct dirent *de;
     DIR *dr = NULL;
-    bool a=(!S_ISDIR(structstat.st_mode)),b=(strcmp(name,".")!=0 && strcmp(name,"..")!=0);
+    bool a=(S_ISDIR(structstat.st_mode)),b=(strcmp(name,".")!=0 && strcmp(name,"..")!=0);
     struct stat sub_structstat;
-    if(a&&b) printFileProperties(structstat,temp, name) ;
-    else if (b){
+
+    //cambia el directorio actual para poder acceder a los archivos
+    /*if(strcmp(getcwd(name,MAXTAML),carpeta)!=0){
+        if(chdir(carpeta)!=0) {
+            strcat(carpeta,"/");
+            return;
+        }
+    }*/
+    //Si no es un directorio, imprime la información del archivo
+    if(!a&&b) printFileProperties(structstat,temp, name) ;
+    //si es un directorio lo abre y recorre
+    else if (a&&b){
         if ((dr = opendir(name)) == NULL) {
             perror(name);
             return;
         }
         while ((de=readdir(dr))!=NULL){
-            //if(stat(de->d_name, &sub_structstat) != 0) perror(de->d_name);
-            if(S_ISDIR(sub_structstat.st_mode)) list_dir_bottom(sub_structstat,temp,de->d_name);
-            /*Esto es eliminable*/else printFileProperties(sub_structstat,temp, de->d_name);
+
+            if((a=(strcmp(de->d_name,".")!=0 && strcmp(de->d_name,"..")!=0)) && (b=stat(de->d_name,&sub_structstat)==0)){
+                //problema aquí
+                if(S_ISDIR(sub_structstat.st_mode))list_dir_bottom(sub_structstat,temp,de->d_name, carpeta/*strcat(carpeta,de->d_name)*/);
+                //else printFileProperties(sub_structstat,temp,)
+            }
+            else if(!a);
+            else  perror(de->d_name);
+
         }
         closedir(dr);
 
