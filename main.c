@@ -26,7 +26,7 @@ void obt_com(tList* comm) {
     bool status_comm=true;
     int i = 0;
 
-    limpiar_string(&an_str,MAXTAML);
+    limpiar_string(an_str,MAXTAML);
     printf("\n>>");
 
     do {
@@ -37,7 +37,7 @@ void obt_com(tList* comm) {
             an_str[i] = '\0';
         } else if(c == ' '){
             insertItem(an_str, comm);
-            limpiar_string(&an_str,i);
+            limpiar_string(an_str,i);
             i = 0;
         }else{
             an_str[i] = c;
@@ -48,10 +48,8 @@ void obt_com(tList* comm) {
 }
 
 bool an_comm(tList L, tList *historia){
-    char aux[MAXTAML], aux_infosis[14]="infosis";
     int a=1;
-
-    //strcpy(aux, L->data);
+    tList *temp;
     if(strcmp(L->data,"pid")==0) a=pid(L->next->data);
     if(strcmp(L->data,"autores")==0) a=autores(L->next->data);
     if(strcmp(L->data,"fecha")==0) a=fecha(L->next->data);
@@ -60,9 +58,10 @@ bool an_comm(tList L, tList *historia){
     if(strcmp(L->data,"ayuda")==0) a=ayuda(L->next->data);
     if(strcmp(L->data,"carpeta")==0) a=carpeta(L->next->data);
     if(strcmp(L->data,"crear")==0) a= crear(&L->next);
-    if(strcmp(L->data,"listfich")==0) a= list_fich(L->next);
+    if(strcmp(L->data,"listfich")==0) a= list_fich(L->next,temp);
+    if(strcmp(L->data,"listdir")==0) a= list_dir_up(L->next,temp);
     if(strcmp(L->data,"borrar")==0) a= borrar(L->next->data);
-    if(strcmp(L->data,"borrarrec")==0) a=borrarrec(L->next->data);
+    if(strcmp(L->data,"borlrarrec")==0) a=borrarrec(L->next->data);
     
     if(strcmp(L->data,"comando")==0){
         tPosL p;
@@ -77,7 +76,7 @@ bool an_comm(tList L, tList *historia){
             printf("Estás intentando reutilizar un \"comando\" lo cual puede romper el programa");
         }
     }
-    if (strcmp(aux, "fin")==0 || strcmp(aux, "salir")==0 || strcmp(aux, "bye")==0)
+    if (strcmp(L->data, "fin")==0 || strcmp(L->data, "salir")==0 || strcmp(L->data, "bye")==0)
         return false;
     if(a!=0) printf("No se ha introducido ningún comando válido");
     return true;
@@ -339,7 +338,7 @@ void sym_link (struct stat stats){
 
     }
 
-void printFileProperties(struct stat stats, tList *temp,char* name ){
+void printFileProperties(struct stat stats, tList *temp,char* name){
     struct tm dt;
     /*if(strcmp(FIN_COMM,comm)==0){
         printf("\nFile size: %ld", stats.st_size);
@@ -390,10 +389,9 @@ void get_parameters(tList *L, tList M){
     }
 }
 
-void an_list(tList* L, void (*function)(struct stat stats, tList *temp,char* name)) {
-    tList p, *temp;
+void an_list(tList* L,tList *temp,void (*function)(struct stat stats, tList *temp,char* name)) {
+    tList p;
     struct stat structstat;
-    createEmptyList(temp);
     get_parameters(temp, *L);
     if (isEmptyList(*temp)) p = *L;
     else p = findItem(last(*temp)->data, *L)->next;
@@ -407,7 +405,7 @@ void an_list(tList* L, void (*function)(struct stat stats, tList *temp,char* nam
 }
 
 
-int list_fich(tList L){
+int list_fich(tList L, tList *temp){
     tPosL p;
     char aux[MAX_AUX_COMM]=FIN_COMM;
     //struct stat structstat;
@@ -416,13 +414,16 @@ int list_fich(tList L){
         carpeta(L->data);
         return 0;
     }
-    an_list(&L,&printFileProperties);
-    //deleteList(temp);
+    createEmptyList(temp);
+    an_list(&L,temp,&printFileProperties);
+    deleteList(temp);
     return 0;
 }
 
-int list_dir_up(tList L){
-    an_list(&L,&list_dir_bottom);
+int list_dir_up(tList L, tList *temp){
+    createEmptyList(temp);
+    an_list(&L,temp,&list_dir_bottom);
+    deleteList(temp);
     return 0;
 }
 
@@ -431,13 +432,13 @@ void list_dir_bottom(struct stat structstat, tList *temp,char* name){
     struct dirent *de;
     DIR *dr;
     struct stat sub_structstat;
-    if(!S_ISDIR(structstat.st_mode))printFileProperties(structstat,*temp,name);
+    if(!S_ISDIR(structstat.st_mode))printFileProperties(structstat,temp,name);
     else{
         dr= opendir(name);
         while ((de=readdir(dr))!=NULL){
             if(stat(de->d_name, &sub_structstat) != 0) perror(de->d_name);
-            if(S_ISDIR(sub_structstat.st_mode)) list_dir_bottom(sub_structstat,*temp,de->d_name);
-            else printFileProperties(sub_structstat,*temp, de->d_name);
+            if(S_ISDIR(sub_structstat.st_mode)) list_dir_bottom(sub_structstat,temp,de->d_name);
+            else printFileProperties(sub_structstat,temp, de->d_name);
         }
         closedir(dr);
     }
