@@ -9,14 +9,14 @@ int main(){
 
 	do {
 		obt_com(&comando);
-        inPrintList(comando,&aux);
+        inPrintList(comando,aux);
 	    insertItem(aux,&hist);
 	    status=an_comm(comando, &hist);
         deleteList(&comando);
         createEmptyList(&comando);
 	    printf("\n");
         deleteList(&comando);
-        limpiar_string(&aux,MAXTAML);
+        limpiar_string(aux,MAXTAML);
 	}while(status);
     deleteList(&hist);
 }
@@ -89,18 +89,18 @@ bool an_comm(tList L, tList *historia){
 int autores(char *str){
 
     if (strcmp(str, FIN_COMM) == 0 ){
-        printf("Rodrigo Dantes Gonzalez Mantuano");
-        printf("David Álvarez Celemín");
-        printf("r.d.gmantuano@udc.es");
-        printf("david.alvarez.celemin@udc.es");
+        printf("Rodrigo Dantes Gonzalez Mantuano\t");
+        printf("David Álvarez Celemín\n");
+        printf("r.d.gmantuano@udc.es\t\t\t");
+        printf("david.alvarez.celemin@udc.es\n");
     }
     if (strcmp(str, "-l") == 0){
-        printf("Rodrigo Dantes Gonzalez Mantuano");
-        printf("David Álvarez Celemín");
+        printf("Rodrigo Dantes Gonzalez Mantuano\t");
+        printf("David Álvarez Celemín\n");
     }
     if (strcmp(str, "-n") == 0) {
-        printf("r.d.gmantuano@udc.es");
-        printf("david.alvarez.celemin@udc.es");
+        printf("r.d.gmantuano@udc.es\t");
+        printf("david.alvarez.celemin@udc.es\n");
     }
     return 0;
 }
@@ -339,14 +339,14 @@ void sym_link (struct stat stats){
 
     }
 
-void printFileProperties(struct stat stats, tList temp,char* name ){
+void printFileProperties(struct stat stats, tList *temp,char* name ){
     struct tm dt;
     /*if(strcmp(FIN_COMM,comm)==0){
         printf("\nFile size: %ld", stats.st_size);
         return;
     }*/
-    if(findItem(FIN_COMM,temp)==NULL/*|| findItem("-long",temp)==NULL && findItem("-link",temp)!=NULL*/){
-        if(findItem("-acc",temp)!=NULL){
+    if(findItem(FIN_COMM,*temp)==NULL/*|| findItem("-long",temp)==NULL && findItem("-link",temp)!=NULL*/){
+        if(findItem("-acc",*temp)!=NULL){
             // File modification time
             dt = *(gmtime(&stats.st_mtime));
             printf("\nModified on: %d-%d-%d %d:%d:%d", dt.tm_mday, dt.tm_mon, dt.tm_year + 1900,
@@ -359,7 +359,7 @@ void printFileProperties(struct stat stats, tList temp,char* name ){
         }
         // Get file creation time in seconds and
         // convert seconds to date and time format
-        if(findItem("-long",temp)){
+        if(findItem("-long",*temp)){
 
             printf("%ld\t%ld\t",stats.st_nlink,stats.st_ino);
 
@@ -372,7 +372,7 @@ void printFileProperties(struct stat stats, tList temp,char* name ){
             printf("\t");
 
         }
-        if(findItem("-link",temp)!=NULL) sym_link(stats);
+        if(findItem("-link",*temp)!=NULL) sym_link(stats);
 
     }
 
@@ -390,58 +390,61 @@ void get_parameters(tList *L, tList M){
     }
 }
 
+void an_list(tList* L, void (*function)(struct stat stats, tList *temp,char* name)) {
+    tList p, *temp;
+    struct stat structstat;
+    createEmptyList(temp);
+    get_parameters(temp, *L);
+    if (isEmptyList(*temp)) p = *L;
+    else p = findItem(last(*temp)->data, *L)->next;
+    for (; p != NULL && strcmp(p->data, FIN_COMM) != 0; p = p->next) {
+        //if(access(p->data, F_OK) == 0) {
+        if (stat(p->data, &structstat) == 0) {
+            (*function)(structstat, temp, p->data);
+        }
+    }
+    deleteList(temp);
+}
+
+
 int list_fich(tList L){
     tPosL p;
-    tList *temp;
     char aux[MAX_AUX_COMM]=FIN_COMM;
-    struct stat structstat;
+    //struct stat structstat;
     //check optional parameters for the function
     if(strcmp(L->data,FIN_COMM)==0) {
         carpeta(L->data);
         return 0;
     }
-    createEmptyList(temp);
-    get_parameters(temp,L);
-
-    //if(L->next->data[0]=='-') return 0;
-
-
-    if(isEmptyList(*temp)) p=L;
-    else p= findItem(last(*temp)->data,L)->next;
-    for ( ;  p!=NULL && strcmp(p->data,FIN_COMM)!=0 ; p=p->next ) {
-        //if(access(p->data, F_OK) == 0) {
-            if(stat(p->data, &structstat)==0){
-                printFileProperties(structstat,*temp,p->data);
-            }
-            else printf("cacatua");
-        //} else {
-            // file doesn't exist
-            // Q_P What we do if wrong option?
-        //}
-        printf("\n");
-    }
-    deleteList(temp);
+    an_list(&L,&printFileProperties);
+    //deleteList(temp);
     return 0;
 }
 
 int list_dir_up(tList L){
-    tList *p_comm,*p_arch,p;
-    createEmptyList(p_comm);
-    createEmptyList(p_arch);
-    for (p=L;p!=NULL;p=p->next) {
-        if(p->data[0]=='-') insertItem(p->data,p_comm);
-        else insertItem(p->data,p_arch);
-    }
-    return 0;//list_dir_bottom(p_comm,p_arch);
+    an_list(&L,&list_dir_bottom);
+    return 0;
 }
-/*
-int list_dir_bottom(tList *p_comm, tList *p_arch){
+
+void list_dir_bottom(struct stat structstat, tList *temp,char* name){
     tList p;
-    for(p=*p_arch;p!=NULL;p=p->next){
-        if()
+    struct dirent *de;
+    DIR *dr;
+    struct stat sub_structstat;
+    if(!S_ISDIR(structstat.st_mode))printFileProperties(structstat,*temp,name);
+    else{
+        dr= opendir(name);
+        while ((de=readdir(dr))!=NULL){
+            if(stat(de->d_name, &sub_structstat) != 0) perror(de->d_name);
+            if(S_ISDIR(sub_structstat.st_mode)) list_dir_bottom(sub_structstat,*temp,de->d_name);
+            else printFileProperties(sub_structstat,*temp, de->d_name);
+        }
+        closedir(dr);
     }
+
+
 }
-*/
+
 void leeCarpeta(char *str){
 	DIR *dirp;
 	struct dirent *e;

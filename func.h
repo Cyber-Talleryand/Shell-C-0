@@ -59,7 +59,9 @@ void sym_link(struct stat stats);
 int crear(tList *L);
 int crear_x(tList L,bool check);
 
+void an_list(tList* L, void (*function)(struct stat stats, tList *temp,char* name));
 int list_fich(tList L);
+void list_dir_bottom(struct stat structstat, tList *temp,char* name);
 //int list_dir_bottom(tList *p_comm,tList *p_arch);
 
 
