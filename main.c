@@ -1,7 +1,13 @@
 #include "func.h"
 
+/*
+ * problemas graves
+ * -no imprime el numero de link (l 354);
+ *
+ * */
+
 int main(){
-    char aux[MAXTAML], comm[MAX_COMM];
+    char aux[MAXTAML];
     tList hist,comando;
     createEmptyList(&hist);
     createEmptyList(&comando);
@@ -118,7 +124,6 @@ int infosis(){
     return 0;
 }
 int pid(char *str){
-    pid_t process_id;
     if(strcmp(str, "-p") == 0)
         printf("Parent_PID Terminal: %d\n",getppid());
     else if(strcmp(str, FIN_COMM) == 0)
@@ -165,7 +170,7 @@ tPosL comando(char *str, tList L) {
     a--;
     for (p = L; p != NULL && i < a; p = p->next) {
         i++;
-    };
+    }
 
     if (a <= i) {
         printf("(*) %s\n", p->data);
@@ -265,6 +270,7 @@ int crear(tList *L){
     for(p=(*L)->next; strcmp(p->data,FIN_COMM)!=0;p=p->next){
         crear_x(p,a);
     }
+    return 0;
 }
 
 int crear_x(tList L, bool a){
@@ -360,9 +366,9 @@ void printFileProperties(struct stat stats, tList *temp,char* name){
         // convert seconds to date and time format
         if(findItem("-long",*temp)){
 
-            printf("%ld\t%ld\t",stats.st_nlink,stats.st_ino);
+            printf("%lu\t%ld\t",stats.st_nlink,stats.st_ino);
 
-            if (stats.st_mode &  S_IRUSR);
+            if (stats.st_mode &  S_IRUSR)
                 printf("r ");
             if (stats.st_mode & S_IWUSR)
                 printf("w ");
@@ -396,7 +402,6 @@ void an_list(tList* L,tList *temp,void (*function)(struct stat stats, tList *tem
     if (isEmptyList(*temp)) p = *L;
     else p = findItem(last(*temp)->data, *L)->next;
     for (; p != NULL && strcmp(p->data, FIN_COMM) != 0; p = p->next) {
-        //if(access(p->data, F_OK) == 0) {
         if (stat(p->data, &structstat) == 0) {
             (*function)(structstat, temp, p->data);
         }
@@ -406,10 +411,6 @@ void an_list(tList* L,tList *temp,void (*function)(struct stat stats, tList *tem
 
 
 int list_fich(tList L, tList *temp){
-    tPosL p;
-    char aux[MAX_AUX_COMM]=FIN_COMM;
-    //struct stat structstat;
-    //check optional parameters for the function
     if(strcmp(L->data,FIN_COMM)==0) {
         carpeta(L->data);
         return 0;
@@ -421,27 +422,36 @@ int list_fich(tList L, tList *temp){
 }
 
 int list_dir_up(tList L, tList *temp){
-    createEmptyList(temp);
-    an_list(&L,temp,&list_dir_bottom);
-    deleteList(temp);
+    if(strcmp(L->data,FIN_COMM)==0) carpeta(FIN_COMM);
+    else {
+        createEmptyList(temp);
+        an_list(&L, temp, &list_dir_bottom);
+        deleteList(temp);
+    }
     return 0;
 }
 
 void list_dir_bottom(struct stat structstat, tList *temp,char* name){
-    tList p;
     struct dirent *de;
-    DIR *dr;
+    DIR *dr = NULL;
+    bool a=(!S_ISDIR(structstat.st_mode)),b=(strcmp(name,".")!=0 && strcmp(name,"..")!=0);
     struct stat sub_structstat;
-    if(!S_ISDIR(structstat.st_mode))printFileProperties(structstat,temp,name);
-    else{
-        dr= opendir(name);
+    if(a&&b) printFileProperties(structstat,temp, name) ;
+    else if (b){
+        if ((dr = opendir(name)) == NULL) {
+            perror(name);
+            return;
+        }
         while ((de=readdir(dr))!=NULL){
-            if(stat(de->d_name, &sub_structstat) != 0) perror(de->d_name);
+            //if(stat(de->d_name, &sub_structstat) != 0) perror(de->d_name);
             if(S_ISDIR(sub_structstat.st_mode)) list_dir_bottom(sub_structstat,temp,de->d_name);
-            else printFileProperties(sub_structstat,temp, de->d_name);
+            /*Esto es eliminable*/else printFileProperties(sub_structstat,temp, de->d_name);
         }
         closedir(dr);
+
     }
+
+
 
 
 }
