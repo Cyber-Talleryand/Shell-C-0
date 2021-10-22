@@ -10,18 +10,16 @@ int main(){
     char aux[MAXTAML];
     tList hist, comando;
     createEmptyList(&hist);
-    createEmptyList(&comando);
     bool status=true;
 
     do {
+        createEmptyList(&comando);
         obt_com(&comando);
         inPrintList(comando,aux);
         insertItem(aux,&hist);
         status=an_comm(comando, &hist,true);
         deleteList(&comando);
-        createEmptyList(&comando);
         printf("\n");
-        deleteList(&comando);
         limpiar_string(aux,MAXTAML);
     }while(status);
     deleteList(&hist);
@@ -30,7 +28,6 @@ int main(){
 void str_to_cmm(char *str, tList* comm) {
     char c, an_str[MAXTAML];
     int aux = 0;
-    tPosL p;
     for(int i = 0; str[i]!='\0'; i++){
         c = str[i];
         if(c == ' '){
@@ -152,13 +149,14 @@ bool an_comm(tList L, tList *historia, bool check){
                 printf("%s\n", aux->data);
                 sleep(1);
                 an_comm(aux, historia, false);
-                deleteList(&aux);
             } else {
                 a = 0;
                 printf("Estás intentando utilizar un \"comando\" que puede romper el programa");
             }
+            deleteList(&aux);
         }
     }
+    deleteList(temp);
     if (strcmp(L->data, "fin")==0 || strcmp(L->data, "salir")==0 || strcmp(L->data, "bye")==0)
         return false;
     if(a==2 && !check) printf("Parámetros introducidos incorrectos");
@@ -221,6 +219,7 @@ int historial(char *str,tList *L){
         i=strtol(str, NULL, 10);
         print_list(*L, i);
     }
+    else return 1;
     return 0;
 }
 int carpeta (char str[]){
