@@ -61,7 +61,7 @@ bool an_comm(tList L, tList *historia,bool check);
 
 void sym_link(struct stat stats);
 
-int crear(tList *L);
+int crear(tList L);
 int crear_x(tList L,bool check);
 
 void an_list(tList* L,tList *temp,void (*function)(struct stat stats, tList *temp, char* name, char *carpeta));

@@ -126,7 +126,7 @@ bool an_comm(tList L, tList *historia, bool check){
         }
         else a=carpeta(L->next->data);
     }
-    if(strcmp(L->data,"crear")==0) a= crear(&L->next);
+    if(strcmp(L->data,"crear")==0) a= crear(L->next);
     if(strcmp(L->data,"listfich")==0) a= list_fich(L->next,&temp);
     if(strcmp(L->data,"listdir")==0) a= list_dir_up(L->next, &temp);
     if(strcmp(L->data,"borrar")==0) a= borrar(L->next);
@@ -156,7 +156,7 @@ bool an_comm(tList L, tList *historia, bool check){
             deleteList(&aux);
         }
     }
-    deleteList(temp);
+    deleteList(&temp);
     if (strcmp(L->data, "fin")==0 || strcmp(L->data, "salir")==0 || strcmp(L->data, "bye")==0)
         return false;
     if(a==2 && !check) printf("Parámetros introducidos incorrectos");
@@ -340,13 +340,20 @@ char * ConvierteModo (mode_t m, char *permisos)
     return permisos;
 }
 
-int crear(tList *L){
+int crear(tList L){
     tList p;
     bool a;
-    if(strcmp((*L)->data,"-f")==0) 
-    	a=true;
-    for(p=(*L)->next; strcmp(p->data,FIN_COMM)!=0;p=p->next){
-        crear_x(p,a);
+
+    for(p=L; strcmp(p->data,FIN_COMM)!=0;p=p->next){
+        if(strcmp(L->data,"-f")==0){
+            a=true;
+            crear_x(p,a);
+            p=p->next;
+        }
+        else{
+            a=false;
+            crear_x(p,a);
+        }
     }
     return 0;
 }
