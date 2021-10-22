@@ -50,6 +50,11 @@ void ayuda_historial();
 void ayuda_carpeta();
 void ayuda_autores();
 void ayuda_salir();
+void ayuda_crear();
+void ayuda_listfich();
+void ayuda_listdir();
+void ayuda_borrar();
+void ayuda_borrarrec();
 int ayuda(char *str);
 tPosL comando(char *str, tList L);
 bool an_comm(tList L, tList *historia);
@@ -59,10 +64,10 @@ void sym_link(struct stat stats);
 int crear(tList *L);
 int crear_x(tList L,bool check);
 
-void an_list(tList* L,tList *temp,void (*function)(struct stat stats, tList *temp,char* name));
+void an_list(tList* L,tList *temp,void (*function)(struct stat stats, tList *temp, char* name, char *carpeta));
 int list_fich(tList L,tList *temp);
 int list_dir_up(tList L,tList *temp);
-void list_dir_bottom(struct stat structstat, tList *temp,char* name, char* carpeta);
+void list_dir_bottom(struct stat structstat, tList *temp, char* name, char *carpeta);
 //int list_dir_bottom(tList *p_comm,tList *p_arch);
 
 

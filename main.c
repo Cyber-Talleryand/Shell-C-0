@@ -8,23 +8,43 @@
 
 int main(){
     char aux[MAXTAML];
-    tList hist,comando;
+    tList hist, comando;
     createEmptyList(&hist);
     createEmptyList(&comando);
     bool status=true;
 
-	do {
-		obt_com(&comando);
+    do {
+        obt_com(&comando);
         inPrintList(comando,aux);
-	    insertItem(aux,&hist);
-	    status=an_comm(comando, &hist);
+        insertItem(aux,&hist);
+        status=an_comm(comando, &hist);
         deleteList(&comando);
         createEmptyList(&comando);
-	    printf("\n");
+        printf("\n");
         deleteList(&comando);
         limpiar_string(aux,MAXTAML);
-	}while(status);
+    }while(status);
     deleteList(&hist);
+}
+
+void str_to_cmm(char *str, tList* comm) {
+    char c, an_str[MAXTAML];
+    int aux = 0;
+    tPosL p;
+    for(int i = 0; str[i]!='\0'; i++){
+        c = str[i];
+        if(c == ' '){
+        	an_str[aux] = '\0';
+            insertItem(an_str, comm);
+            limpiar_string(an_str,i);
+            aux = 0;
+        }else if ((c>=65 && c<=90) || (c>=97 && c<=122) || c==45){
+            an_str[aux] = c;
+            aux++;
+        }
+    }
+    insertItem(an_str, comm);
+    insertItem(FIN_COMM,comm);
 }
 
 void obt_com(tList* comm) {
@@ -39,9 +59,10 @@ void obt_com(tList* comm) {
         c = getchar();
         if (i >= MAX_COMM || c == EOF || c == '\n') {
             status_comm = false;
-            insertItem(an_str, comm);
             an_str[i] = '\0';
+            insertItem(an_str, comm);
         } else if(c == ' '){
+        	an_str[i] = '\0';
             insertItem(an_str, comm);
             limpiar_string(an_str,i);
             i = 0;
@@ -55,36 +76,47 @@ void obt_com(tList* comm) {
 
 bool an_comm(tList L, tList *historia){
     int a=1;
-    tList *temp;
+    tList temp;
+    createEmptyList(&temp);
     if(strcmp(L->data,"pid")==0) a=pid(L->next->data);
     if(strcmp(L->data,"autores")==0) a=autores(L->next->data);
     if(strcmp(L->data,"fecha")==0) a=fecha(L->next->data);
     if(strcmp(L->data,"infosis")==0) a=infosis();
-    if(strcmp(L->data,"hist")==0) a=historial(L->next->data,historia);
+    if(strcmp(L->data,"hist")==0) a= historial(L->next->data,historia);
     if(strcmp(L->data,"ayuda")==0) a=ayuda(L->next->data);
     if(strcmp(L->data,"carpeta")==0) a=carpeta(L->next->data);
     if(strcmp(L->data,"crear")==0) a= crear(&L->next);
-    if(strcmp(L->data,"listfich")==0) a= list_fich(L->next,temp);
-    if(strcmp(L->data,"listdir")==0) a= list_dir_up(L->next,temp);
-    if(strcmp(L->data,"borrar")==0) a= borrar(L->next->data);
-    if(strcmp(L->data,"borlrarrec")==0) a=borrarrec(L->next->data);
-    
-    if(strcmp(L->data,"comando")==0){
+    if(strcmp(L->data,"listfich")==0) a= list_fich(L->next,&temp);
+    if(strcmp(L->data,"listdir")==0) a= list_dir_up(L->next, &temp);
+    if(strcmp(L->data,"borrar")==0) a= borrar(L->next);
+    if(strcmp(L->data,"borrarrec")==0) a= borrarrec(L->next);
+
+    if(strcmp(L->data,"comando")==0) {
         tPosL p;
-        p=comando(L->next->data, *historia);
-        if(p==NULL){
+        p = comando(L->next->data, *historia);
+        //printf("Error");
+        if (p == NULL) {
             printf("Número de comando inválido");
-            a=0;
-        }
-        else if(strcmp(L->next->data,"comando") != 0) an_comm(p, historia);
-        else{
-            a=0;
-            printf("Estás intentando reutilizar un \"comando\" lo cual puede romper el programa");
+            a = 0;
+        } else {
+            tList aux;
+            createEmptyList(&aux);
+            //char *pre_comm = NULL;
+            //strcpy(pre_comm, p->data);
+            str_to_cmm(p->data, &aux);
+            if (strcmp(aux->data, "comando") != 0) {
+                printf("%s\n", aux->data);
+                sleep(1);
+                an_comm(aux, historia);
+            } else {
+                a = 0;
+                printf("Estás intentando utilizar un \"comando\" que puede romper el programa");
+            }
         }
     }
     if (strcmp(L->data, "fin")==0 || strcmp(L->data, "salir")==0 || strcmp(L->data, "bye")==0)
         return false;
-    if(a!=0) printf("No se ha introducido ningún comando válido");
+    //if(a!=0) printf("No se ha introducido ningún comando válido");
     return true;
 
 }
@@ -153,7 +185,8 @@ int carpeta (char str[]){
     else if(chdir(str)==0){
         printf("Movido a %s",str);
     }
-    else printf("Directorio no válido\n");
+    else perror("Directorio no válido");
+    printf(" ");
     return 0;
 }
 int getpwd(){
@@ -222,7 +255,7 @@ void ayuda_salir(){
 
 
 void limpiar_string(char* string, int c){
-    for(int i = 0; i < c && string[i]!='/0'; i++){
+    for(int i = 0; i < c && string[i]!='\0'; i++){
         string[i] = '\0';
     }
 
@@ -265,7 +298,8 @@ char * ConvierteModo (mode_t m, char *permisos)
 int crear(tList *L){
     tList p;
     bool a;
-    if(strcmp((*L)->data,"-f")==0) a=true;
+    if(strcmp((*L)->data,"-f")==0) 
+    	a=true;
     for(p=(*L)->next; strcmp(p->data,FIN_COMM)!=0;p=p->next){
         crear_x(p,a);
     }
@@ -275,7 +309,7 @@ int crear(tList *L){
 int crear_x(tList L, bool a){
     FILE *fp;
     if (a){
-        if((fp=fopen(L->data,"r"))!=NULL) {
+        if((fp=fopen(L->data,"r"))!= NULL) {
             printf("Cannot create that file, already exists");
             fclose(fp);
         }
@@ -326,24 +360,24 @@ void sym_link (struct stat stats){
 //
 //        len = readlink("/usr/bin/perl", buf, bufsize);
 //        buf[len] = '\0';*/
-        char linkname[MAX_MID];
-        char cwd[MAX_MID];
+    char linkname[MAX_MID];
+    char cwd[MAX_MID];
 
 
-        if(getcwd(cwd,sizeof(cwd))!=NULL){
-            ssize_t r = readlink(cwd, linkname, MAX_MID);
+    if(getcwd(cwd,sizeof(cwd))!=NULL){
+        ssize_t r = readlink(cwd, linkname, MAX_MID);
 
-            if (r != -1) {
-                linkname[r] = '\0';
-                printf(" -> %s\t", linkname);
-            }
-            else
-                printf("none\t");
+        if (r != -1) {
+            linkname[r] = '\0';
+            printf(" -> %s\t", linkname);
         }
-
+        else
+            printf("none\t");
     }
 
-void printFileProperties(struct stat stats, tList *temp,char* name){
+}
+
+void printFileProperties(struct stat stats, tList *temp,char* name, char *carpeta){
     struct tm dt;
     /*if(strcmp(FIN_COMM,comm)==0){
         printf("\nFile size: %ld", stats.st_size);
@@ -381,11 +415,11 @@ void printFileProperties(struct stat stats, tList *temp,char* name){
     }
 
 
-        // File size
-        printf("%ld\t", stats.st_size);
+    // File size
+    printf("%ld\t", stats.st_size);
     printf("%s\t",name);
     printf("\n");
-    }
+}
 
 void get_parameters(tList *L, tList M){
     tPosL p;
@@ -394,7 +428,7 @@ void get_parameters(tList *L, tList M){
     }
 }
 
-void an_list(tList* L,tList *temp,void (*function)(struct stat stats, tList *temp,char* name)) {
+void an_list(tList* L,tList *temp,void (*function)(struct stat stats, tList *temp, char* name, char *carpeta)) {
     tList p;
     struct stat structstat;
     get_parameters(temp, *L);
@@ -402,7 +436,7 @@ void an_list(tList* L,tList *temp,void (*function)(struct stat stats, tList *tem
     else p = findItem(last(*temp)->data, *L)->next;
     for (; p != NULL && strcmp(p->data, FIN_COMM) != 0; p = p->next) {
         if (stat(p->data, &structstat) == 0) {
-            (*function)(structstat, temp, p->data);
+            (*function)(structstat, temp, p->data, p->data);
         }
     }
     deleteList(temp);
@@ -411,7 +445,7 @@ void an_list(tList* L,tList *temp,void (*function)(struct stat stats, tList *tem
 
 int list_fich(tList L, tList *temp){
     if(strcmp(L->data,FIN_COMM)==0) {
-        carpeta(L->data);
+        getpwd();
         return 0;
     }
     createEmptyList(temp);
@@ -421,8 +455,9 @@ int list_fich(tList L, tList *temp){
 }
 
 int list_dir_up(tList L, tList *temp){
-    if(strcmp(L->data,FIN_COMM)==0) carpeta(FIN_COMM);
-    else {
+    if(strcmp(L->data,FIN_COMM)==0)
+        carpeta(FIN_COMM);
+    else{
         createEmptyList(temp);
         an_list(&L, temp, &list_dir_bottom);
         deleteList(temp);
@@ -433,7 +468,7 @@ int list_dir_up(tList L, tList *temp){
 void list_dir_bottom(struct stat structstat, tList *temp,char* name, char* carpeta){
     struct dirent *de;
     DIR *dr = NULL;
-    bool a=(S_ISDIR(structstat.st_mode)),b=(strcmp(name,".")!=0 && strcmp(name,"..")!=0);
+    bool a=(S_ISDIR(structstat.st_mode)), b=(strcmp(name,".")!=0 && strcmp(name,"..")!=0);
     struct stat sub_structstat;
 
     //cambia el directorio actual para poder acceder a los archivos
@@ -444,8 +479,8 @@ void list_dir_bottom(struct stat structstat, tList *temp,char* name, char* carpe
         }
     }*/
     //Si no es un directorio, imprime la información del archivo
-    if(!a&&b) printFileProperties(structstat,temp, name) ;
-    //si es un directorio lo abre y recorre
+    if(!a&&b) printFileProperties(structstat,temp, name, name) ;
+        //si es un directorio lo abre y recorre
     else if (a&&b){
         if ((dr = opendir(name)) == NULL) {
             perror(name);
@@ -455,7 +490,8 @@ void list_dir_bottom(struct stat structstat, tList *temp,char* name, char* carpe
 
             if((a=(strcmp(de->d_name,".")!=0 && strcmp(de->d_name,"..")!=0)) && (b=stat(de->d_name,&sub_structstat)==0)){
                 //problema aquí
-                if(S_ISDIR(sub_structstat.st_mode))list_dir_bottom(sub_structstat,temp,de->d_name, carpeta/*strcat(carpeta,de->d_name)*/);
+                if(S_ISDIR(sub_structstat.st_mode))
+                    list_dir_bottom(sub_structstat,temp,de->d_name, carpeta/*strcat(carpeta,de->d_name)*/);
                 //else printFileProperties(sub_structstat,temp,)
             }
             else if(!a);
@@ -472,45 +508,6 @@ void list_dir_bottom(struct stat structstat, tList *temp,char* name, char* carpe
 }
 
 void leeCarpeta(char *str){
-	DIR *dirp;
-	struct dirent *e;
-	errno = 0;
-	if ((dirp = opendir(str)) == NULL) {
-			perror(str);
-			return;
-	}
-	while((e = readdir(dirp)) != NULL){
-		if((strcmp(e->d_name, ".") * strcmp(e->d_name, "..")) != 0){
-			//función
-		}
-	}
-}
-
-
-
-int borrar(tList L){
-	if(strcmp(L->data,FIN_COMM)==0){
-		getpwd();
-		return 0;
-	}else{
-		for(tPosL p = L; strcmp(p->data, FIN_COMM)!=0; p = p->next){
-			if(remove(p->data) != 0){
-				perror(p->data);
-                printf("\n");
-			}
-		}
-		return 0;
-	}
-}
-void rec(char *str){
-    struct stat structstat;
-    if(stat(str, &structstat) != 0)
-        perror(str);
-    if(LetraTF(structstat.st_mode) != 'd'){
-        if(remove(str) != 0)
-            perror(str);
-        return;
-    }
     DIR *dirp;
     struct dirent *e;
     errno = 0;
@@ -520,11 +517,57 @@ void rec(char *str){
     }
     while((e = readdir(dirp)) != NULL){
         if((strcmp(e->d_name, ".") * strcmp(e->d_name, "..")) != 0){
-            printf("I %s",e->d_name);
-            if(remove(e->d_name) != 0)
-                rec(e->d_name);
+            //función
         }
     }
+}
+
+
+
+int borrar(tList L){
+    if(strcmp(L->data,FIN_COMM)==0){
+        getpwd();
+        return 0;
+    }else{
+        for(tPosL p = L; strcmp(p->data, FIN_COMM)!=0; p = p->next){
+            if(remove(p->data) != 0){
+                perror(p->data);
+                printf("\n");
+            }
+        }
+        return 0;
+    }
+}
+void rec(char *str){
+	char source[MAX_COMM];
+	getcwd(source, MAX_COMM);
+    struct stat structstat;
+    if(stat(str, &structstat) != 0)
+        perror(str);
+    /*if(LetraTF(structstat.st_mode) != 'd'){
+        if(remove(str) != 0)
+            perror(str);
+        return;
+    }*/
+    DIR *dirp;
+    struct dirent *e;
+    errno = 0;
+    if ((dirp = opendir(str)) == NULL)
+        perror(str);
+    else{
+    	chdir(str);
+		while((e = readdir(dirp)) != NULL){
+		    if((strcmp(e->d_name, ".") * strcmp(e->d_name, "..")) != 0){
+		        if(remove(e->d_name) != 0)
+					rec(e->d_name);
+				else
+					perror(e->d_name);
+		    }
+		}
+		chdir(source);
+		if(remove(str) != 0)
+			perror(str);
+	}
 }
 
 int borrarrec(tList L){
