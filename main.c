@@ -17,7 +17,7 @@ int main(){
         obt_com(&comando);
         inPrintList(comando,aux);
         insertItem(aux,&hist);
-        status=an_comm(comando, &hist);
+        status=an_comm(comando, &hist,true);
         deleteList(&comando);
         createEmptyList(&comando);
         printf("\n");
@@ -74,17 +74,61 @@ void obt_com(tList* comm) {
     insertItem(FIN_COMM, comm);
 }
 
-bool an_comm(tList L, tList *historia){
+bool an_comm(tList L, tList *historia, bool check){
     int a=1;
     tList temp;
     createEmptyList(&temp);
-    if(strcmp(L->data,"pid")==0) a=pid(L->next->data);
-    if(strcmp(L->data,"autores")==0) a=autores(L->next->data);
-    if(strcmp(L->data,"fecha")==0) a=fecha(L->next->data);
-    if(strcmp(L->data,"infosis")==0) a=infosis();
-    if(strcmp(L->data,"hist")==0) a= historial(L->next->data,historia);
-    if(strcmp(L->data,"ayuda")==0) a=ayuda(L->next->data);
-    if(strcmp(L->data,"carpeta")==0) a=carpeta(L->next->data);
+    if(strcmp(L->data,"pid")==0) {
+        if(count_node(L->next)>2){
+            check=false;
+            a=2;
+        }
+        else a=pid(L->next->data);
+    }
+    if(strcmp(L->data,"autores")==0) {
+        if(count_node(L->next)>2){
+            check=false;
+            a=2;
+        }
+        else a=autores(L->next->data);
+
+    }
+    if(strcmp(L->data,"fecha")==0){
+        if(count_node(L->next)>2){
+            check=false;
+            a=2;
+        }
+        else a=fecha(L->next->data);
+    }
+    if(strcmp(L->data,"infosis")==0) {
+        if(count_node(L->next)>1){
+            check=false;
+            a=2;
+        }
+        else a=infosis();
+    }
+    if(strcmp(L->data,"hist")==0) {
+        if(count_node(L->next)>2){
+            check=false;
+            a=2;
+        }
+        else a= historial(L->next->data,historia);
+    }
+    if(strcmp(L->data,"ayuda")==0) {
+        if(count_node(L->next)>2){
+            check=false;
+            a=2;
+        }
+        else
+        a=ayuda(L->next->data);
+    }
+    if(strcmp(L->data,"carpeta")==0) {
+        if(count_node(L->next)>2){
+            check=false;
+            a=2;
+        }
+        else a=carpeta(L->next->data);
+    }
     if(strcmp(L->data,"crear")==0) a= crear(&L->next);
     if(strcmp(L->data,"listfich")==0) a= list_fich(L->next,&temp);
     if(strcmp(L->data,"listdir")==0) a= list_dir_up(L->next, &temp);
@@ -107,7 +151,8 @@ bool an_comm(tList L, tList *historia){
             if (strcmp(aux->data, "comando") != 0) {
                 printf("%s\n", aux->data);
                 sleep(1);
-                an_comm(aux, historia);
+                an_comm(aux, historia, false);
+                deleteList(&aux);
             } else {
                 a = 0;
                 printf("Estás intentando utilizar un \"comando\" que puede romper el programa");
@@ -116,7 +161,8 @@ bool an_comm(tList L, tList *historia){
     }
     if (strcmp(L->data, "fin")==0 || strcmp(L->data, "salir")==0 || strcmp(L->data, "bye")==0)
         return false;
-    //if(a!=0) printf("No se ha introducido ningún comando válido");
+    if(a==2 && !check) printf("Parámetros introducidos incorrectos");
+    if(a==1 && !check) printf("No se ha introducido ningún comando válido");
     return true;
 
 }

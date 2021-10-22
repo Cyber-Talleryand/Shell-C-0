@@ -12,6 +12,13 @@ void createEmptyList (tList* L){
     *L=LNULL;
 }
 
+int count_node(tList L){
+    tPosL p;
+    int i=0;
+    for(p=L;p!=NULL;p=p->next)i++;
+    return i;
+}
+
 
 /*En la declaración del nodo, se utiliza un puntero al cual le asignamos el espacio de memoria del struct y devuelve
 un puntero no nulo.*/
@@ -155,11 +162,9 @@ void inPrintList(tList L,char c[MAXTAML]){
     char auxc[MAXTAML];
     tPosL aux;
     strcpy(c,L->data);
-    for(aux=L->next;aux!=LNULL && strcmp(aux->data,"-0")!=0;aux=aux->next){
-        for(;i<MAXTAML && c[i]!='\0';i++);
-        c[i]=' ';
-        strcpy(auxc,aux->data);
-        strcat(c,auxc );
+    for(aux=L->next;aux!=LNULL && (strcmp(aux->data,"-0")!=0 /*|| strcmp(aux->data,"")!=0*/);aux=aux->next){
+        strcat(c," ");
+        strcat(c,aux->data);
     }
 }
 

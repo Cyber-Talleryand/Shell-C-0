@@ -57,7 +57,7 @@ void ayuda_borrar();
 void ayuda_borrarrec();
 int ayuda(char *str);
 tPosL comando(char *str, tList L);
-bool an_comm(tList L, tList *historia);
+bool an_comm(tList L, tList *historia,bool check);
 
 void sym_link(struct stat stats);
 

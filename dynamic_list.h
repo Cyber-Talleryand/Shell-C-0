@@ -41,5 +41,6 @@ tPosL next(tPosL p, tList L);                       //Devuelve la posición en 
 void print_list(tList L, int i);
 void print_lista(tList L);
 void inPrintList(tList L,char c[MAXTAML]);
+int count_node(tList L);
 
 #endif
