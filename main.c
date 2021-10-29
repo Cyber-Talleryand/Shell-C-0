@@ -1,15 +1,10 @@
 #include "func.h"
-
-/*
- * problemas graves
- * -no imprime el numero de link (l 354);
- *
- * */
-
+/*@Alvaro revisa si el cambio char *str => char *str[] es correcto*/
 int main(){
     char aux[MAXTAML];
-    tList hist, comando;
+    tList hist, comando, dynamic_memory;
     createEmptyList(&hist);
+    createEmptyList(&dynamic_memory);
     bool status=true;
 
     do {
@@ -17,7 +12,7 @@ int main(){
         obt_com(&comando);
         inPrintList(comando,aux);
         insertItem(aux,&hist);
-        status=an_comm(comando, &hist,true);
+        status=an_comm(comando, &hist, &dynamic_memory,true);
         deleteList(&comando);
         printf("\n");
         limpiar_string(aux,MAXTAML);
@@ -25,7 +20,7 @@ int main(){
     deleteList(&hist);
 }
 
-void str_to_cmm(char *str, tList* comm) {
+void str_to_cmm(char /* * */str[], tList* comm) {
     char c, an_str[MAXTAML];
     int aux = 0;
     for(int i = 0; str[i]!='\0'; i++){
@@ -71,7 +66,7 @@ void obt_com(tList* comm) {
     insertItem(FIN_COMM, comm);
 }
 
-bool an_comm(tList L, tList *historia, bool check){
+bool an_comm(tList L, tList *historia, tList *dynamic_memory,bool check){
     int a=1;
     tList temp;
     createEmptyList(&temp);
@@ -135,20 +130,17 @@ bool an_comm(tList L, tList *historia, bool check){
     if(strcmp(L->data,"comando")==0) {
         tPosL p;
         p = comando(L->next->data, *historia);
-        //printf("Error");
         if (p == NULL) {
             printf("Número de comando inválido");
             a = 0;
         } else {
             tList aux;
             createEmptyList(&aux);
-            //char *pre_comm = NULL;
-            //strcpy(pre_comm, p->data);
             str_to_cmm(p->data, &aux);
             if (strcmp(aux->data, "comando") != 0) {
                 printf("%s\n", aux->data);
                 sleep(1);
-                an_comm(aux, historia, false);
+                an_comm(aux, historia, dynamic_memory,  false);
             } else {
                 a = 0;
                 printf("Estás intentando utilizar un \"comando\" que puede romper el programa");
@@ -296,6 +288,28 @@ void ayuda_carpeta(){
 void ayuda_salir(){
     printf("Saca al usuario de la shell");
 }
+void ayuda_crear(){
+    printf("Crea directorio en la carpeta actual\n "
+           "Si se usa la opción \"-f\" se crea un fichero en lugar de un directorio");
+}
+
+void ayuda_listfich(){
+    printf("Imprime la información de los archivos que van a continuación del comando\n"
+           "\"-long\" amplía la información sobre los archivos"
+           "\"-link\" muestra la relación simbólica con otros archivos"
+           "\"-acc\" substituye la fecha de última modificación por la de último acceso"
+            "Si no hay parámetros imprime la dirección del directorio actual\n"
+           "");
+}
+void ayuda_listdir(){
+    printf("");
+}
+void ayuda_borrar(){
+    printf("Borra los archivos o directorios vacíos indicados");
+}
+void ayuda_borrarrec(){
+    printf("Borra los directorios o archivos de forma recursiva");
+}
 
 
 
@@ -303,7 +317,6 @@ void limpiar_string(char* string, int c){
     for(int i = 0; i < c && string[i]!='\0'; i++){
         string[i] = '\0';
     }
-
 }
 
 
@@ -342,19 +355,13 @@ char * ConvierteModo (mode_t m, char *permisos)
 
 int crear(tList L){
     tList p;
-    bool a;
-
-    for(p=L; strcmp(p->data,FIN_COMM)!=0;p=p->next){
-        if(strcmp(L->data,"-f")==0){
-            a=true;
-            crear_x(p,a);
-            p=p->next;
-        }
-        else{
-            a=false;
-            crear_x(p,a);
-        }
-    }
+    bool a = false;
+	if(strcmp(L->data,"-f")==0){
+		a = true;
+		L = L-> next;
+	}
+	for(p=L; strcmp(p->data,FIN_COMM)!=0;p=p->next)
+        crear_x(p, a);
     return 0;
 }
 
@@ -373,18 +380,14 @@ int crear_x(tList L, bool a){
             }
             else fclose(fp);
         }
-    }
-    else{
-        if (mkdir(L->data, 0777) == -1){
+    }else if (mkdir(L->data, 0777) == -1)
             printf("Error al crear el directiorio");
-        }
         else
             printf("Directory created %s",L->data);
-    }
     return 0;
 }
 
-void sym_link (struct stat stats){
+void sym_link (){
     //else if(strcmp(comm,"-link")==0){
 
 //      Solucion copiada
@@ -429,48 +432,46 @@ void sym_link (struct stat stats){
 
 }
 
-void printFileProperties(struct stat stats, tList *temp,char* name, char *carpeta){
+void printFileProperties(struct stat stats, tList *temp,char* name){
     struct tm dt;
-    /*if(strcmp(FIN_COMM,comm)==0){
-        printf("\nFile size: %ld", stats.st_size);
-        return;
-    }*/
-    if(findItem(FIN_COMM,*temp)==NULL/*|| findItem("-long",temp)==NULL && findItem("-link",temp)!=NULL*/){
-        if(findItem("-acc",*temp)!=NULL){
-            // File modification time
-            dt = *(gmtime(&stats.st_mtime));
-            printf("\nModified on: %d-%d-%d %d:%d:%d", dt.tm_mday, dt.tm_mon, dt.tm_year + 1900,
-                   dt.tm_hour, dt.tm_min, dt.tm_sec);
-        } else{
-            dt = *(gmtime(&stats.st_ctime));
-            printf("\nCreated on: %d-%d-%d %d:%d:%d", dt.tm_mday, dt.tm_mon, dt.tm_year + 1900,
-                   dt.tm_hour, dt.tm_min, dt.tm_sec);
+    if(!(name[0] == '.' && findItem("-hid",*temp)==NULL)){
+		if(findItem(FIN_COMM,*temp)==NULL/*|| findItem("-long",temp)==NULL && findItem("-link",temp)!=NULL*/){
+		    if(findItem("-acc",*temp)!=NULL){
+		        // File modification time
+		        dt = *(gmtime(&stats.st_mtime));
+		        printf("\nModified on: %d-%d-%d %d:%d:%d", dt.tm_mday, dt.tm_mon, dt.tm_year + 1900,
+		               dt.tm_hour, dt.tm_min, dt.tm_sec);
+		    } else{
+		        dt = *(gmtime(&stats.st_ctime));
+		        printf("\nCreated on: %d-%d-%d %d:%d:%d", dt.tm_mday, dt.tm_mon, dt.tm_year + 1900,
+		               dt.tm_hour, dt.tm_min, dt.tm_sec);
 
-        }
-        // Get file creation time in seconds and
-        // convert seconds to date and time format
-        if(findItem("-long",*temp)){
+		    }
+		    // Get file creation time in seconds and
+		    // convert seconds to date and time format
+		    if(findItem("-long",*temp)){
 
-            printf("%lu\t%ld\t",stats.st_nlink,stats.st_ino);
+		        printf("%lu\t%ld\t",stats.st_nlink,stats.st_ino);
 
-            if (stats.st_mode &  S_IRUSR)
-                printf("r ");
-            if (stats.st_mode & S_IWUSR)
-                printf("w ");
-            if (stats.st_mode & S_IXUSR)
-                printf("x");
-            printf("\t");
+		        if (stats.st_mode &  S_IRUSR)
+		            printf("r ");
+		        if (stats.st_mode & S_IWUSR)
+		            printf("w ");
+		        if (stats.st_mode & S_IXUSR)
+		            printf("x");
+		        printf("\t");
 
-        }
-        if(findItem("-link",*temp)!=NULL) sym_link(stats);
+		    }
+		    if(findItem("-link",*temp)!=NULL) sym_link();
 
-    }
+		}
 
 
-    // File size
-    printf("%ld\t", stats.st_size);
-    printf("%s\t",name);
-    printf("\n");
+		// File size
+		printf("%ld\t", stats.st_size);
+		printf("%s\t",name);
+		printf("\n");
+	}
 }
 
 void get_parameters(tList *L, tList M){
@@ -480,7 +481,7 @@ void get_parameters(tList *L, tList M){
     }
 }
 
-void an_list(tList* L,tList *temp,void (*function)(struct stat stats, tList *temp, char* name, char *carpeta)) {
+void an_list(tList* L,tList *temp,void (*function)(struct stat stats, tList *temp, char* name)) {
     tList p;
     struct stat structstat;
     get_parameters(temp, *L);
@@ -488,7 +489,7 @@ void an_list(tList* L,tList *temp,void (*function)(struct stat stats, tList *tem
     else p = findItem(last(*temp)->data, *L)->next;
     for (; p != NULL && strcmp(p->data, FIN_COMM) != 0; p = p->next) {
         if (stat(p->data, &structstat) == 0) {
-            (*function)(structstat, temp, p->data, p->data);
+            (*function)(structstat, temp, p->data);
         }
     }
     deleteList(temp);
@@ -517,64 +518,32 @@ int list_dir_up(tList L, tList *temp){
     return 0;
 }
 
-void list_dir_bottom(struct stat structstat, tList *temp,char* name, char* carpeta){
+void list_dir_bottom(struct stat structstat, tList *temp,char* name){
     struct dirent *de;
     DIR *dr = NULL;
     bool a=(S_ISDIR(structstat.st_mode)), b=(strcmp(name,".")!=0 && strcmp(name,"..")!=0);
     struct stat sub_structstat;
-
-    //cambia el directorio actual para poder acceder a los archivos
-    /*if(strcmp(getcwd(name,MAXTAML),carpeta)!=0){
-        if(chdir(carpeta)!=0) {
-            strcat(carpeta,"/");
-            return;
-        }
-    }*/
+    char source[MAX_COMM];
+    getcwd(source, MAX_COMM);
     //Si no es un directorio, imprime la información del archivo
-    if(!a&&b) printFileProperties(structstat,temp, name, name) ;
+    if(!a)
+        printFileProperties(structstat,temp, name) ;
         //si es un directorio lo abre y recorre
     else if (a&&b){
+    	printf("\n%s->\n", name);
         if ((dr = opendir(name)) == NULL) {
             perror(name);
             return;
         }
+        chdir(name);
         while ((de=readdir(dr))!=NULL){
-
-            if((a=(strcmp(de->d_name,".")!=0 && strcmp(de->d_name,"..")!=0)) && (b=stat(de->d_name,&sub_structstat)==0)){
-                //problema aquí
-                if(S_ISDIR(sub_structstat.st_mode))
-                    list_dir_bottom(sub_structstat,temp,de->d_name, carpeta/*strcat(carpeta,de->d_name)*/);
-                //else printFileProperties(sub_structstat,temp,)
-            }
-            else if(!a);
-            else  perror(de->d_name);
-
+            stat(de->d_name, &sub_structstat);
+            list_dir_bottom(sub_structstat, temp, de->d_name);
         }
         closedir(dr);
-
-    }
-
-
-
-
-}
-
-void leeCarpeta(char *str){
-    DIR *dirp;
-    struct dirent *e;
-    errno = 0;
-    if ((dirp = opendir(str)) == NULL) {
-        perror(str);
-        return;
-    }
-    while((e = readdir(dirp)) != NULL){
-        if((strcmp(e->d_name, ".") * strcmp(e->d_name, "..")) != 0){
-            //función
-        }
+        chdir(source);
     }
 }
-
-
 
 int borrar(tList L){
     if(strcmp(L->data,FIN_COMM)==0){
@@ -638,3 +607,64 @@ int borrarrec(tList L){
     }
     return 0;
 }
+
+void malloc_general(char *str, char *size, tList *dynamic_register){
+    long i;
+    int in;
+    char *rubbish,input_list[MAX_AUX_COMM];
+    void *a;
+    tPosL p;
+    if(size==NULL){
+        for(p=*dynamic_register;p!=NULL;p=p->next->next->next){
+            printf("%s: size:%s. malloc %s",p->data,p->next->data,p->next->next->data);
+        }
+
+    }
+    if(str==NULL){
+        i= strtol(size,&rubbish,10);
+        if(i>0 && rubbish==NULL){
+            a=malloc(i);
+            insertItem(size,dynamic_register);
+            sprintf(input_list,"%p",a);
+            printf("Memory allocated on %p",a);
+            insertItem(input_list,dynamic_register);
+            time_t t = time(NULL);
+            struct tm tm = *localtime(&t);
+            /*Get actual date and time*/
+            insertItem(input_list,dynamic_register);
+
+        }
+        else if(strcmp(str,"free")==0){
+            p=findItem(size,*dynamic_register);
+            if(p!=NULL){
+                free(atoi(p->data));
+                deleteAtPosition(p,dynamic_register);
+                return;
+            }
+        }
+        else{
+            perror("Parámetros introducidos incorrectos");
+
+        }
+        return;
+    }
+
+
+}
+
+/*
+void leeCarpeta(char *str){
+    DIR *dirp;
+    struct dirent *e;
+    errno = 0;
+    if ((dirp = opendir(str)) == NULL) {
+        perror(str);
+        return;
+    }
+    while((e = readdir(dirp)) != NULL){
+        if((strcmp(e->d_name, ".") * strcmp(e->d_name, "..")) != 0){
+            //función
+        }
+    }
+}
+*/
