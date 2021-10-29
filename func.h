@@ -57,17 +57,17 @@ void ayuda_borrar();
 void ayuda_borrarrec();
 int ayuda(char *str);
 tPosL comando(char *str, tList L);
-bool an_comm(tList L, tList *historia,bool check);
+bool an_comm(tList L, tList *historia, tList *dynamic_memory,bool check);
 
-void sym_link(struct stat stats);
+void sym_link();
 
 int crear(tList L);
 int crear_x(tList L,bool check);
 
-void an_list(tList* L,tList *temp,void (*function)(struct stat stats, tList *temp, char* name, char *carpeta));
+void an_list(tList* L,tList *temp,void (*function)(struct stat stats, tList *temp, char* name));
 int list_fich(tList L,tList *temp);
 int list_dir_up(tList L,tList *temp);
-void list_dir_bottom(struct stat structstat, tList *temp, char* name, char *carpeta);
+void list_dir_bottom(struct stat structstat, tList *temp, char* name);
 //int list_dir_bottom(tList *p_comm,tList *p_arch);
 
 

@@ -116,9 +116,6 @@ tPosL previous(tPosL p, tList L){
     }
 }
 
-
-
-
 /*Libera la memoria que ocupa la lista si no está vacía*/
 void deleteList(tList* L){
     tPosL p;
@@ -139,21 +136,6 @@ void print_list(tList L,int i){
     for(aux=L;aux!=LNULL && a<i;aux=aux->next){
         a++;
         printf("%d-> %s\n",a, aux->data);
-
-    }
-}
-/*
-bool copyList(tList L, tList *M){
-    tPosL p
-    for(p=M;p!=NULL;p=p.next){
-        if
-    }
-}
-*/
-void print_lista(tList L){
-    tPosL aux;
-    for(aux=L;aux!=LNULL;aux=aux->next){
-        printf("%s\n",aux->data);
     }
 }
 
@@ -168,17 +150,8 @@ void inPrintList(tList L,char c[MAXTAML]){
     }
 }
 
-void multitouni(tList *L){
-    tList M;
-
-    tPosL aux;
-    deleteList(L);
-    createEmptyList(L);
-    insertItem(M->data,L);
-    for(aux=M->next;aux!=LNULL;aux=aux->next){
-        strcat((*L)->data, aux->data);
-        strcat((*L)->data," ");
-    }
-
-
+void deleteAtPosition(tPosL p, tList *L){
+    previous(p,*L)->next=p->next;
+    free(p);
 }
+
