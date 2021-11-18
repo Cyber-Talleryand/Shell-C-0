@@ -41,7 +41,7 @@ struct tMemory{
 
 void createEmptyMemoList(MemList *L);
 bool isEmptyListMemo(MemList L);
-void insertItemMemo(void* item, MemList *L);
+void insertItemMemo(struct tMemory* item, MemList *L);
 MemPos findDirMemo(void* item, MemList L);
 MemPos findSizeMemo(long size, MemList L);
 MemPos findItemMemo(void* item, MemList L);
@@ -49,6 +49,9 @@ void* getItemMemo(MemPos p, MemList L);
 void deleteAtPositionMemo(MemPos p,MemList *L);
 void deleteMemorygroup(MemPos p, MemList *L);
 void deleteListMemo(MemList *L);
-MemPos* createItemMemo(long size);
-void print_memory_list(MemList *L);
+struct tMemory* createItemMemo(long size);
+void print_memory_list(MemList L);
+void modifyItem(struct tMemory* item,char* type, description descriptor);
+description createDescriptorShared(int key);
+description createDescriptormmap(int fd, char* filename);
 #endif //SHELL_MEMORY_LIST_H
