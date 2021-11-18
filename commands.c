@@ -36,6 +36,12 @@ void str_to_cmm(char /* * */str[], tList* comm) {
     insertItem(FIN_COMM,comm);
 }
 
+long str_to_int(char* str, char* rubbish){
+    long i;
+    i= strtol(str,&rubbish,10);
+    return i;
+}
+
 
 
 
@@ -66,98 +72,6 @@ void obt_com(tList* comm) {
     insertItem(FIN_COMM, comm);
 }
 
-
-
-bool an_comm(tList L, tList *historia, tList *dynamic_memory,bool check){
-    int a=1;
-    tList temp;
-    createEmptyList(&temp);
-    if(is_comm_equals(L->data,"pid")) {
-        if(count_node(L->next)>2){
-            check=false;
-            a=2;
-        }
-        else a=pid(L->next->data);
-    }
-    if(is_comm_equals(L->data,"autores")) {
-        if(count_node(L->next)>2){
-            check=false;
-            a=2;
-        }
-        else a=autores(L->next->data);
-
-    }
-    if(is_comm_equals(L->data,"fecha")){
-        if(count_node(L->next)>2){
-            check=false;
-            a=2;
-        }
-        else a=fecha(L->next->data);
-    }
-    if(is_comm_equals(L->data,"infosis")) {
-        if(count_node(L->next)>1){
-            check=false;
-            a=2;
-        }
-        else a=infosis();
-    }
-    if(is_comm_equals(L->data,"hist")) {
-        if(count_node(L->next)>2){
-            check=false;
-            a=2;
-        }
-        else a= historial(L->next->data,historia);
-    }
-    if(is_comm_equals(L->data,"ayuda")) {
-        if(count_node(L->next)>2){
-            check=false;
-            a=2;
-        }
-        else
-            a=ayuda(L->next->data);
-    }
-    if(is_comm_equals(L->data,"carpeta")) {
-        if(count_node(L->next)>2){
-            check=false;
-            a=2;
-        }
-        else a=carpeta(L->next->data);
-    }
-    if(is_comm_equals(L->data,"crear")) a= crear(L->next);
-    if(is_comm_equals(L->data,"listfich")) a= list_fich(L->next,&temp);
-    if(is_comm_equals(L->data,"listdir")) a= list_dir_up(L->next, &temp);
-    if(is_comm_equals(L->data,"borrar")) a= borrar(L->next);
-    if(is_comm_equals(L->data,"borrarrec")) a= borrarrec(L->next);
-
-    if(is_comm_equals(L->data,"comando")) {
-        tPosL p;
-        p = comando(L->next->data, *historia);
-        if (p == NULL) {
-            printf("Número de comando inválido");
-            a = 0;
-        } else {
-            tList aux;
-            createEmptyList(&aux);
-            str_to_cmm(p->data, &aux);
-            if (!is_comm_equals(aux->data, "comando")) {
-                printf("%s\n", aux->data);
-                sleep(1);
-                an_comm(aux, historia, dynamic_memory,  false);
-            } else {
-                a = 0;
-                printf("Estás intentando utilizar un \"comando\" que puede romper el programa");
-            }
-            deleteList(&aux);
-        }
-    }
-    deleteList(&temp);
-    if (is_comm_equals(L->data, "fin") || is_comm_equals(L->data, "salir") || is_comm_equals(L->data, "bye"))
-        return false;
-    if(a==2 && !check) printf("Parámetros introducidos incorrectos");
-    if(a==1 && !check) printf("No se ha introducido ningún comando válido");
-    return true;
-
-}
 
 
 int autores(char *str){
@@ -317,17 +231,26 @@ void ayuda_borrarrec(){
 
 
 
-char LetraTF (mode_t m)
-{
-    switch (m&S_IFMT) { /*and bit a bit con los bits de formato,0170000 */
-        case S_IFSOCK: return 's'; /*socket */
-        case S_IFLNK: return 'l'; /*symbolic link*/
-        case S_IFREG: return '-'; /* fichero normal*/
-        case S_IFBLK: return 'b'; /*block device*/
-        case S_IFDIR: return 'd'; /*directorio */
-        case S_IFCHR: return 'c'; /*char device*/
-        case S_IFIFO: return 'p'; /*pipe*/
-        default: return '?'; /*desconocido, no deberia aparecer*/
+
+
+void get_parameters(tList *L, tList M){
+    tPosL p;
+    for(p=M;p!=NULL && p->data[0]=='-';p=p->next){
+        insertItem(p->data,L);
     }
+}
+
+void an_list(tList* L,tList *temp,void (*function)(struct stat stats, tList *temp, char* name)) {
+    tList p;
+    struct stat structstat;
+    get_parameters(temp, *L);
+    if (isEmptyList(*temp)) p = *L;
+    else p = findItem(last(*temp)->data, *L)->next;
+    for (; p != NULL && !is_comm_void(p->data); p = p->next) {
+        if (stat(p->data, &structstat) == 0) {
+            (*function)(structstat, temp, p->data);
+        }
+    }
+    deleteList(temp);
 }
 

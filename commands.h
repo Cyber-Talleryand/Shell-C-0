@@ -11,9 +11,11 @@
 #include <stdbool.h>
 #include <sys/stat.h>
 #include <time.h>
-
+#include "storage_mod.h"
 #include <unistd.h>
 #include <sys/utsname.h>
+
+
 #define FIN_COMM "-0"
 
 #define MAX_COMM 999
@@ -23,7 +25,7 @@ bool is_comm_equals(char* str, char* str2);
 void limpiar_string(char* string, int c);
 void str_to_cmm(char /* * */str[], tList* comm);
 void obt_com(tList* comm);
-bool an_comm(tList L, tList *historia, tList *dynamic_memory,bool check);
+
 int autores(char *str);
 int fecha(char *str);
 int infosis();
@@ -47,6 +49,9 @@ void ayuda_listdir();
 void ayuda_borrar();
 void ayuda_borrarrec();
 void ayuda_ayuda();
+void an_list(tList* L,tList *temp,void (*function)(struct stat stats, tList *temp, char* name));
+void get_parameters(tList *L, tList M);
+long str_to_int(char* str, char* rubbish);
 
 
 #endif //SHELL_COMMANDS_H
