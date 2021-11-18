@@ -51,7 +51,7 @@ void deleteMemorygroup(MemPos p, MemList *L);
 void deleteListMemo(MemList *L);
 struct tMemory* createItemMemo(long size);
 void print_memory_list(MemList L);
-void modifyItem(struct tMemory* item,char* type, description descriptor);
+void modifyItem(struct tMemory* item,enum type_id type, description descriptor);
 description createDescriptorShared(int key);
 description createDescriptormmap(int fd, char* filename);
 #endif //SHELL_MEMORY_LIST_H

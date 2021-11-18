@@ -17,6 +17,7 @@ void limpiar_string(char* string, int c){
         string[i] = '\0';
     }
 }
+
 void str_to_cmm(char /* * */str[], tList* comm) {
     char c, an_str[MAXTAML];
     int aux = 0;
@@ -41,8 +42,6 @@ long str_to_int(char* str, char* rubbish){
     i= strtol(str,&rubbish,10);
     return i;
 }
-
-
 
 
 void obt_com(tList* comm) {

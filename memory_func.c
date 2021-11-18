@@ -5,32 +5,30 @@
 #include "memory_func.h"
 
 
+
 void malloc_general(char *str, char *size, MemList *dynamic_register){
     long i;
     int in;
     char *rubbish,input_list[MAX_AUX_COMM];
     void *a;
-
-    MemPos p,*aux;
+    MemPos p;
+    struct tMemory *item;
     if(is_comm_void(size)){
         for(p=*dynamic_register;p!=NULL;p=p->next){
             printf("%p: size:%ld. malloc %d-%02d-%02d \n",p->memdir,p->size,p->date.tm_year+1900,p->date.tm_mon,p->date.tm_mday);
         }
 
     }
+    i=str_to_int(size, rubbish);
     if(is_comm_void(str)){
-        i=str_to_int(size, rubbish);
         if(i>0 && rubbish==NULL){
-            aux=createItemMemo(i);
-            (*aux)->typeId=memo;
-            insertItemMemo(aux,dynamic_register);
+            description description1;
+            item=createItemMemo(i);
+            modifyItem(item,memo,description1);
+            insertItemMemo(item,dynamic_register);
         }
         else if(strcmp(str,"free")==0){
-            p=findSizeMemo(i,*dynamic_register);
-            if(p!=NULL){
-                deleteAtPositionMemo(p,dynamic_register);
-                return;
-            }
+            deleteFromMemoryGeneral((int)i,dynamic_register);
         }
         else{
             perror("Parámetros introducidos incorrectos");
@@ -44,19 +42,19 @@ void malloc_general(char *str, char *size, MemList *dynamic_register){
 void dealloc(char *str, tList* list_memo, MemList* L){
 
     tPosL p;
-    if(is_comm_equals(str,"-malloc")){
-        for(p=list_memo;p!=NULL;p=p->next){
-            malloc_general("-free",p->data,L);
+    if(is_comm_equals(str,"-malloc") || is_comm_void(str)){
+        for(p=*list_memo;p!=NULL;p=p->next){
+            deleteFromMemoryGeneral((int) str_to_int(p->data,NULL),L);
         }
     }
     else if(is_comm_equals(str,"-shared")){
-        for(p=list_memo;p!=NULL;p=p->next){
-            //malloc_general("-free",p->data,L);
+        for(p=*list_memo;p!=NULL;p=p->next){
+            deleteFromMemoryShared(str_to_int(p->data,NULL),L);
         }
     }
     else if(is_comm_equals(str,"-mmap")){
-        for(p=list_memo;p!=NULL;p=p->next){
-         //   malloc_general("-free",p->data,L);
+        for(p=*list_memo;p!=NULL;p=p->next){
+            deleteFromMemoryMmap(p->data,L);
         }
     }
     else if(is_comm_void(str) && !is_comm_void((*list_memo)->data)){
@@ -76,66 +74,22 @@ void dealloc(char *str, tList* list_memo, MemList* L){
     }
 }
 
-
-
-
-
-
-ssize_t LeerFichero (char *fich, void *p, ssize_t n)
-{ /* le n bytes del fichero fich en p */
-
-    ssize_t nleidos,tam=n; /*si n==-1 lee el fichero completo*/
-    int df, aux;
-    struct stat s;
-    if (stat (fich,&s)==-1 || (df=open(fich,O_RDONLY))==-1)
-        return ((ssize_t)-1);
-    if (n==LEERCOMPLETO)
-        tam=(ssize_t) s.st_size;
-    if ((nleidos=read(df,p, tam))==-1){
-        aux=errno;
-        close(df);
-        errno=aux;
-        return ((ssize_t)-1);
-    }
-    close (df);
-    return (nleidos);
-}
-
-void * MmapFichero (char * fichero, int protection)
-{
-    int df, map=MAP_PRIVATE,modo=O_RDONLY;
-    struct stat s;
+void SharedCreate (char *str, char *str2,MemList* L){
+    /*arg[0] is the key
+and arg[1] is the size*/
+    key_t k;
+    size_t tam=0;
     void *p;
-    if (protection&PROT_WRITE) modo=O_RDWR;
-    if (stat(fichero,&s)==-1 || (df=open(fichero, modo))==-1)
-        return NULL;
-    if ((p=mmap (NULL,s.st_size, protection,map,df,0))==MAP_FAILED)
-        return NULL;
-/*Guardar Direccion de Mmap (p, s.st_size,fichero,df......);*/
-    return p;
-}
-
-void Mmap (char *str, char* str2, char *fich) {
-    /*arg[0] is the file name
-and arg[1] is the permissions*/
-
-    char *perm;
-    void *p;
-    int protection=0;
-    if (strcmp(str,"-free")!=0)
-    {/*Listar Direcciones de Memoria mmap;*/ return;}
-    if (strcmp(str2,"perm")!=0 && strlen(perm)<4) {
-        if (strchr(perm,'r')!=NULL) protection|=PROT_READ;
-        if (strchr(perm,'w')!=NULL) protection|=PROT_WRITE;
-        if (strchr(perm,'x')!=NULL) protection|=PROT_EXEC;
+    if (str==NULL || str2==NULL ) {
+        print_memory_list(*L);
+        return;
     }
-    if ((p=MmapFichero(str,protection))==NULL){
-        perror ("Imposible mapear fichero");
-    }
-
-
+    k=(key_t) atoi(str);
+    if (str2!=NULL)tam=(size_t) atoll(str2);
+    if ((p=ObtenerMemoriaShmget(k,tam,L))==NULL)
+        perror ("Imposible obtener memoria shmget");
     else{
-        printf ("fichero %s mapeado en %p\n", str, p);
+        printf ("Memoria de shmget de clave %d asignada en %p\n",k,p);
     }
 
 }
@@ -166,32 +120,13 @@ esta funcion vale para shared y shared -create*/
     shmctl (id,IPC_STAT,&s);
     item=createItemMemo((long int)tam);
     description= createDescriptorShared(clave);
-    modifyItem(item,"shared",description);
+    modifyItem(item,shared,description);
     insertItemMemo(item,L);
 /* Guardar En Direcciones de Memoria Shared (p, s.shm_segsz, clave.....);*/
     return (p);
 }
 
-void SharedCreate (char *str, char *str2,MemList* L) /*arg[0] is the key
-and arg[1] is the size*/
-{
-    key_t k;
-    size_t tam=0;
-    void *p;
-    if (str==NULL || str2==NULL ) {
-        print_memory_list(*L);
-        return;
-    }
 
-    k=(key_t) atoi(str);
-    if (str2!=NULL)tam=(size_t) atoll(str2);
-    if ((p=ObtenerMemoriaShmget(k,tam))==NULL)
-        perror ("Imposible obtener memoria shmget");
-    else{
-        printf ("Memoria de shmget de clave %d asignada en %p\n",k,p);
-    }
-
-}
 void SharedDelkey (char *str) /*arg[0] points to a str containing the key*/{
     key_t clave;
     int id;
@@ -209,6 +144,59 @@ void SharedDelkey (char *str) /*arg[0] points to a str containing the key*/{
 
     if (shmctl(id,IPC_RMID,NULL)==-1) perror ("shmctl: imposible eliminar memoria compartida\n");
 }
+
+
+
+void * MmapFichero (char * fichero, int protection,MemList *L)
+{
+    int df, map=MAP_PRIVATE,modo=O_RDONLY;
+    struct stat s;
+    void *p;
+    struct tMemory* item;
+    description descriptor;
+    if (protection&PROT_WRITE) modo=O_RDWR;
+    if (stat(fichero,&s)==-1 || (df=open(fichero, modo))==-1)
+        return NULL;
+    if ((p=mmap (NULL,s.st_size, protection,map,df,0))==MAP_FAILED)
+        return NULL;
+/*Guardar Direccion de Mmap (p, s.st_size,fichero,df......);*/
+    item=createItemMemo(s.st_size);
+    descriptor=createDescriptormmap(df,fichero);
+    modifyItem(item,mmap_id,descriptor);
+    insertItemMemo(item,L);
+    return p;
+}
+
+void Mmap (char *str, char* str2, char *fich, MemList *L) {
+    /*arg[0] is the file name
+and arg[1] is the permissions*/
+    if(is_comm_void(fich)){
+        print_memory_list(*L);
+        return;
+    }
+    char *perm;
+    void *p;
+    int protection=0;
+    if (is_comm_equals(str,"-free")){
+        deleteFromMemoryMmap(fich,L);
+    }
+    if (strcmp(str2,"perm")!=0 && strlen(perm)<4) {
+        if (strchr(perm,'r')!=NULL) protection|=PROT_READ;
+        if (strchr(perm,'w')!=NULL) protection|=PROT_WRITE;
+        if (strchr(perm,'x')!=NULL) protection|=PROT_EXEC;
+    }
+
+    if ((p=MmapFichero(str,protection,L))==NULL){
+        perror ("Imposible mapear fichero");
+    }
+
+
+    else{
+        printf ("fichero %s mapeado en %p\n", str, p);
+    }
+
+}
+
 
 void dopmap () /*no arguments necessary*/{ pid_t pid; /*ejecuta el comando externo pmap para */
     char elpid[32]; /*pasandole el pid del proceso actual */
@@ -229,14 +217,19 @@ void dopmap () /*no arguments necessary*/{ pid_t pid; /*ejecuta el comando exter
 
 void main_shared(char* str,char* key, char* tam, MemList* L){
     if(is_comm_equals(str,"-create")){
-        SharedCreate(str,key);
-
+        struct tMemory* item;
+        description description1;
+        SharedCreate(str,key,L);
+        item=createItemMemo(str_to_int(tam,NULL));
+        description1=createDescriptorShared((int)str_to_int(key,NULL));
+        modifyItem(item,shared,description1);
     }
     else if(is_comm_equals(str,"-delkey")){
         SharedDelkey(key);
     }
     else if(is_comm_equals(str,"-free")){
 
+        deleteFromMemoryShared(str_to_int(key,NULL),L);
     }
     else if(is_comm_void(str)){
 
@@ -249,5 +242,47 @@ long str_to_int_base(char* str, char* rubbish, int base){
     i= strtol(str,&rubbish,base);
     return i;
 }
+
+
+
+ssize_t LeerFichero (char *fich, void *p, ssize_t n)
+{ /* le n bytes del fichero fich en p */
+
+    ssize_t nleidos,tam=n; /*si n==-1 lee el fichero completo*/
+    int df, aux;
+    struct stat s;
+    if (stat (fich,&s)==-1 || (df=open(fich,O_RDONLY))==-1)
+        return ((ssize_t)-1);
+    if (n==LEERCOMPLETO)
+        tam=(ssize_t) s.st_size;
+    if ((nleidos=read(df,p, tam))==-1){
+        aux=errno;
+        close(df);
+        errno=aux;
+        return ((ssize_t)-1);
+    }
+    close (df);
+    return (nleidos);
+}
+
+
+
+void recursiva_bottom (int n)
+{
+    char automatico[TAMANO];
+    static char estatico[TAMANO];
+    printf ("parametro n:%d en %p\n",n,&n);
+    printf ("array estatico en:%p \n",estatico);
+    printf ("array automatico en %p\n\n",automatico);
+    n--;
+    if (n>0)
+        recursiva_bottom(n);
+}
+
+void doRecursiva(char* n){
+    recursiva_bottom((int)str_to_int(n,NULL));
+}
+
+
 
 

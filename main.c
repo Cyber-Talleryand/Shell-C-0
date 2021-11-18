@@ -19,6 +19,7 @@ int main(){
         limpiar_string(aux,MAXTAML);
     }while(status);
     deleteList(&hist);
+    deleteListMemo(&dynamic_memory);
 }
 
 
@@ -98,9 +99,17 @@ bool an_comm(tList L, tList *historia, MemList *dynamic_memory,bool check){
             dealloc(L->next->data,&L->next->next,dynamic_memory);
         }
     }
-
-
-
+    if(is_comm_equals(L->data,"shared")){
+        if(count_node(L->next)==2){
+            main_shared(FIN_COMM,L->next->data,L->next->next->data,dynamic_memory);
+        }
+        else if(count_node(L->next)==3){
+            main_shared(L->next->data,L->next->next->data,L->next->next->next->data,dynamic_memory);
+        }
+    }
+    if(is_comm_equals(L->data,"recursiva")){
+        doRecursiva(L->next->data);
+    }
     if(is_comm_equals(L->data,"comando")) {
         tPosL p;
         p = comando(L->next->data, *historia);

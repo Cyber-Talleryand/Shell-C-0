@@ -25,19 +25,21 @@ struct tMemory* createItemMemo(long size){
     return str_memo;
 }
 
-void modifyItem(struct tMemory* item,char* type, description descriptor){
-    if(strcmp(type,"memo")==0){
+void modifyItem(struct tMemory* item,enum type_id type, description descriptor){
+    if(type==memo){
         item->typeId=memo;
     }
-    else if(strcmp(type,"shared")==0){
+    else if(type==shared){
         item->typeId=shared;
         item->info=descriptor;
 
     }
-    else if(strcmp(type,"mmap")==0){
+    else if(type==mmap_id){
         item->typeId=mmap_id;
         item->info=descriptor;
     }
+    else item->typeId=undef;
+    return;
     //(*item)->info=memo;
 }
 
@@ -82,6 +84,7 @@ void* getItemMemo(MemPos p, MemList L) {
 }
 void deleteAtPositionMemo(MemPos p,MemList *L){
     MemPos m,temp;
+    if(p==MNULL) return;
     for(m=*L;m!=MNULL && m->next->memdir!=p->memdir;m=m->next);
     if(m->next->memdir==p->memdir){
         temp=m->next;
@@ -91,19 +94,6 @@ void deleteAtPositionMemo(MemPos p,MemList *L){
     }
 };
 
-void deleteMemorygroup(MemPos p, MemList *L) {
-
-    MemPos p;
-    /*Recorre toda la lista por punteros eliminando cada uno de ellos teniendo en cuenta que el último valor alcanzado de
-     * "*L" es "nulo" y por ello no es necesario eliminarlo y además queda con el valos que indica que la lista está vacía,
-     * no siendo necesario el comando createEmptyList para darle los valores correctos*/
-
-    while (*L != MNULL) {
-        p = *L;
-        *L = (*L)->next;
-        free(p);
-    }
-}
 
 
 void deleteListMemo(MemList *L){
@@ -111,6 +101,7 @@ void deleteListMemo(MemList *L){
     while(*L!=MNULL){
         p=*L;
         *L=(*L)->next;
+        free(p->memdir);
         free(p);
     }
 };
