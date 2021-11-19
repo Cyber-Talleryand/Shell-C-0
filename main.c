@@ -5,9 +5,10 @@ int main(){
     int count;
     tList hist, comando;
     MemList dynamic_memory;
+    bool status=true;
     createEmptyList(&hist);
     createEmptyMemoList(&dynamic_memory);
-    bool status=true;
+
 
     do {
         createEmptyList(&comando);

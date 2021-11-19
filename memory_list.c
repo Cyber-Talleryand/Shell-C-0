@@ -20,7 +20,6 @@ struct tMemory* createItemMemo(long size){
     str_memo->size=size;
     str_memo->typeId=undef;
     str_memo->next=MNULL;
-    str_memo->typeId=undef;
     //str_memo->info;
     return str_memo;
 }
@@ -75,9 +74,6 @@ MemPos findDirMemo(void* item, MemList L){
 };
 
 
-MemPos findItemMemo(void* item, MemList L){
-
-}
 MemPos findSizeMemo(long size, MemList L){
     MemPos p;
     for(p=L;p!=MNULL && p->size!=size;p=p->next);
