@@ -26,7 +26,7 @@ long str_to_int_base(char* str, char* rubbish, int base);
 void dealloc(char *str, tList *memo, MemList* L);
 void malloc_general(char *str, char *size, MemList *dynamic_register);
 void main_shared(char* str,char* key, char* tam, MemList* L);
-void SharedCreate (char *str, char *str2,MemList* L);
+bool SharedCreate (char *str, char *str2,MemList* L);
 void doRecursiva (char *n);
 void recursiva_bottom(int n);
 #endif //SHELL_MEMORY_FUNC_H

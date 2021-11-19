@@ -85,7 +85,7 @@ bool an_comm(tList L, tList *historia, MemList *dynamic_memory,bool check){
     else if(is_comm_equals(L->data,"borrar")) a= borrar(L->next);
     else if(is_comm_equals(L->data,"borrarrec")) a= borrarrec(L->next);
     else if(is_comm_equals(L->data,"malloc")){
-        if(count_node(L->next)<1){
+        if(count_node(L->next)==0){
             malloc_general(FIN_COMM,FIN_COMM,dynamic_memory);
         }
         else if(count_node(L->next)==1){
@@ -97,6 +97,9 @@ bool an_comm(tList L, tList *historia, MemList *dynamic_memory,bool check){
         }
     }
     else if(is_comm_equals(L->data,"dealloc")){
+        if(count_node(L->next)==0){
+            dealloc(FIN_COMM,NULL,dynamic_memory);
+        }
         if(count_node(L->next)==1){
             dealloc(FIN_COMM,&L->next,dynamic_memory);
         }
@@ -105,13 +108,14 @@ bool an_comm(tList L, tList *historia, MemList *dynamic_memory,bool check){
         }
     }
     else if(is_comm_equals(L->data,"shared")){
-        if((a=count_node(L->next))==1){
-            main_shared(FIN_COMM,L->next->data,L->next->next->data,dynamic_memory);
+
+        if((a=count_node(L->next))==0){
+            main_shared(FIN_COMM,FIN_COMM,FIN_COMM,dynamic_memory);
         }
-        else if(a==2){
-            main_shared(L->next->data,L->next->next->data,L->next->next->next->data,dynamic_memory);
+        else if(a==1){
+            main_shared(FIN_COMM,L->next->data,NULL,dynamic_memory);
         }
-        else if(a==3){
+        else if(a==2 || a==3){
             main_shared(L->next->data,L->next->next->data,L->next->next->next->data,dynamic_memory);
         }
     }

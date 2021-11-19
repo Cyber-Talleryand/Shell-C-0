@@ -13,11 +13,10 @@ void deleteFromMemoryGeneral(int search, MemList *L){
 }
 
 void deleteFromMemoryShared(long key, MemList *L){
-    MemPos p;
+    MemPos p=*L;
     for(p=*L;p!=MNULL;p=p->next){
         if(p->typeId==shared && p->info.key==key){
             deleteAtPositionMemo(p,L);
-            p=MNULL;
         }
     }
 }

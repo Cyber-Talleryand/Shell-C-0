@@ -44,8 +44,8 @@ void malloc_general(char *str, char *size, MemList *dynamic_register){
 
 void dealloc(char *str, tList* list_memo, MemList* L){
 
-    tPosL p;
-    if(is_comm_equals(str,"-malloc") || is_comm_void(str)){
+    tPosL p=NULL;
+    if(is_comm_equals(str,"-malloc") && is_comm_void(str)){
         for(p=*list_memo;p!=NULL;p=p->next){
             deleteFromMemoryGeneral((int) str_to_int(p->data,NULL),L);
         }
@@ -60,11 +60,11 @@ void dealloc(char *str, tList* list_memo, MemList* L){
             deleteFromMemoryMmap(p->data,L);
         }
     }
-    else if(is_comm_void(str) && !is_comm_void((*list_memo)->data)){
+    else if(is_comm_void(str) && list_memo!=NULL &&!is_comm_void((*list_memo)->data)){
         MemPos f;
         void* i;
         char* rubbish;
-        for(p=*list_memo;p!=NULL;p=p->next){
+        for(p=*list_memo;p!=NULL&& strcmp(p->data,FIN_COMM)!=0;p=p->next){
             i= (void *) str_to_int_base(p->data,rubbish,16);
             f= findDirMemo(i,*L);
             if(f!=NULL){
@@ -74,30 +74,12 @@ void dealloc(char *str, tList* list_memo, MemList* L){
     }
     else if(is_comm_void(str)){
         MemPos f;
-        for(f=*L;p!=NULL;p=p->next){
+        for(f=*L;f!=NULL;f=f->next){
             if(f->typeId==memo)printf("%p: size:%ld. malloc %d-%02d-%02d \n",f->memdir,f->size,f->date.tm_year+1900,f->date.tm_mon,f->date.tm_mday);
+            else if(f->typeId==shared)printf("%p: size:%ld. shared memory (key %i) %d-%02d-%02d \n",f->memdir,f->size,f->info.key,f->date.tm_year+1900,f->date.tm_mon,f->date.tm_mday);
+            else if(f->typeId==mmap_id)printf("%p: size:%ld. mmap %s (fd %i) %d-%02d-%02d \n",f->memdir,f->size,f->info.file.filename,f->info.file.fd,f->date.tm_year+1900,f->date.tm_mon,f->date.tm_mday);
         }
     }
-}
-
-void SharedCreate (char *str, char *str2,MemList* L){
-    /*arg[0] is the key
-and arg[1] is the size*/
-    key_t k;
-    size_t tam=0;
-    void *p;
-    if (str==NULL || str2==NULL ) {
-        print_memory_list(*L);
-        return;
-    }
-    k=(key_t) atoi(str);
-    if (str2!=NULL)tam=(size_t) atoll(str2);
-    if ((p=ObtenerMemoriaShmget(k,tam,L))==NULL)
-        perror ("Imposible obtener memoria shmget");
-    else{
-        printf ("Memoria de shmget de clave %d asignada en %p\n",k,p);
-    }
-
 }
 
 void * ObtenerMemoriaShmget (key_t clave, size_t tam, MemList* L)
@@ -132,6 +114,29 @@ esta funcion vale para shared y shared -create*/
     return (p);
 }
 
+bool SharedCreate (char *str, char *str2,MemList* L){
+    /*arg[0] is the key
+and arg[1] is the size*/
+    key_t k;
+    size_t tam=0;
+    void *p;
+    if (str==NULL || str2==NULL ) {
+        print_memory_list(*L);
+        return true;
+    }
+    k=(key_t) atoi(str);
+    if (str2!=NULL)tam=(size_t) atoll(str2);
+    if ((p=ObtenerMemoriaShmget(k,tam,L))==NULL){
+        perror ("Imposible obtener memoria shmget");
+        return false;
+    }
+    else{
+        printf ("Memoria de shmget de clave %d asignada en %p\n",k,p);
+        return true;
+    }
+
+}
+
 
 void SharedDelkey (char *str) /*arg[0] points to a str containing the key*/{
     key_t clave;
@@ -148,9 +153,48 @@ void SharedDelkey (char *str) /*arg[0] points to a str containing the key*/{
         return;
     }
 
-    if (shmctl(id,IPC_RMID,NULL)==-1) perror ("shmctl: imposible eliminar memoria compartida\n");
+    if (shmctl(id,IPC_RMID,NULL)==-1) {
+        perror("shmctl: imposible eliminar memoria compartida\n");
+        return;
+    }
+    printf("Key:%i elimminada",clave);
+
+
 }
 
+void main_shared(char* str,char* key, char* tam, MemList* L){
+    MemPos p;
+    if(is_comm_equals(str,"-create")){
+        struct tMemory* item;
+        description description1;
+        if(SharedCreate(key,tam,L)){
+            item=createItemMemo(str_to_int(tam,NULL));
+            description1=createDescriptorShared((int)str_to_int(key,NULL));
+            modifyItem(item,shared,description1);
+            insertItemMemo(item,L);
+        }
+    }
+    else if(is_comm_equals(str,"-delkey")){
+        SharedDelkey(key);
+    }
+    else if(is_comm_equals(str,"-free")){
+
+        deleteFromMemoryShared(str_to_int(key,NULL),L);
+    }
+    else if(is_comm_void(str) && !is_comm_void(key)){
+        for(p=*L;p!=NULL;p=p->next){
+            if(p->typeId==shared && p->info.key== str_to_int(key,NULL))printf("Allocated shared memory (key %i) at %p",p->info.key,p->memdir);
+        }
+
+    }
+    else if(is_comm_void(str)){
+        for(p=*L;p!=NULL;p=p->next){
+            if(p->typeId==shared)printf("%p: size:%ld. malloc %d-%02d-%02d \n",p->memdir,p->size,p->date.tm_year+1900,p->date.tm_mon,p->date.tm_mday);
+        }
+    }
+
+
+}
 
 
 void * MmapFichero (char * fichero, int protection,MemList *L)
@@ -187,7 +231,6 @@ and arg[1] is the permissions*/
         deleteFromMemoryMmap(fich,L);
         return;
     }
-    char *perm;
     void *p;
     int protection=0;
 
@@ -226,31 +269,7 @@ void dopmap () /*no arguments necessary*/{ pid_t pid; /*ejecuta el comando exter
 }
 
 
-void main_shared(char* str,char* key, char* tam, MemList* L){
-    if(is_comm_equals(str,"-create")){
-        struct tMemory* item;
-        description description1;
-        SharedCreate(key,tam,L);
-        item=createItemMemo(str_to_int(tam,NULL));
-        description1=createDescriptorShared((int)str_to_int(key,NULL));
-        modifyItem(item,shared,description1);
-    }
-    else if(is_comm_equals(str,"-delkey")){
-        SharedDelkey(key);
-    }
-    else if(is_comm_equals(str,"-free")){
 
-        deleteFromMemoryShared(str_to_int(key,NULL),L);
-    }
-    else if(is_comm_void(str)){
-        MemPos p;
-        for(p=*L;p!=NULL;p=p->next){
-            if(p->typeId==shared)printf("%p: size:%ld. malloc %d-%02d-%02d \n",p->memdir,p->size,p->date.tm_year+1900,p->date.tm_mon,p->date.tm_mday);
-        }
-    }
-
-
-}
 long str_to_int_base(char* str, char* rubbish, int base){
     long i;
     i= strtol(str,&rubbish,base);

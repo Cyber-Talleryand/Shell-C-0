@@ -73,6 +73,8 @@ MemPos findDirMemo(void* item, MemList L){
     if(p->memdir==item) return p;
     return MNULL;
 };
+
+
 MemPos findItemMemo(void* item, MemList L){
 
 }
