@@ -15,25 +15,28 @@ void malloc_general(char *str, char *size, MemList *dynamic_register){
     struct tMemory *item;
     if(is_comm_void(size)){
         for(p=*dynamic_register;p!=NULL;p=p->next){
-            printf("%p: size:%ld. malloc %d-%02d-%02d \n",p->memdir,p->size,p->date.tm_year+1900,p->date.tm_mon,p->date.tm_mday);
+            if(p->typeId==memo)printf("%p: size:%ld. malloc %d-%02d-%02d \n",p->memdir,p->size,p->date.tm_year+1900,p->date.tm_mon,p->date.tm_mday);
         }
 
     }
     i=str_to_int(size, rubbish);
     if(is_comm_void(str)){
-        if(i>0 && rubbish==NULL){
+        if(i>0){
             description description1;
             item=createItemMemo(i);
             modifyItem(item,memo,description1);
             insertItemMemo(item,dynamic_register);
         }
-        else if(strcmp(str,"free")==0){
-            deleteFromMemoryGeneral((int)i,dynamic_register);
-        }
-        else{
-            perror("Parámetros introducidos incorrectos");
-        }
+
+
         return;
+    }
+    else if(is_comm_equals(str,"-free")){
+        deleteFromMemoryGeneral((int)i,dynamic_register);
+        return;
+    }
+    else{
+        perror("Parámetros introducidos incorrectos");
     }
 
 
@@ -70,7 +73,10 @@ void dealloc(char *str, tList* list_memo, MemList* L){
         }
     }
     else if(is_comm_void(str)){
-        print_memory_list(*L);
+        MemPos f;
+        for(f=*L;p!=NULL;p=p->next){
+            if(f->typeId==memo)printf("%p: size:%ld. malloc %d-%02d-%02d \n",f->memdir,f->size,f->date.tm_year+1900,f->date.tm_mon,f->date.tm_mday);
+        }
     }
 }
 
@@ -170,20 +176,25 @@ void * MmapFichero (char * fichero, int protection,MemList *L)
 void Mmap (char *str, char* str2, char *fich, MemList *L) {
     /*arg[0] is the file name
 and arg[1] is the permissions*/
+    MemPos f;
     if(is_comm_void(fich)){
-        print_memory_list(*L);
+        for(f=*L;f!=NULL;f=f->next){
+            if(f->typeId==memo)printf("%p: size:%ld. malloc %d-%02d-%02d \n",f->memdir,f->size,f->date.tm_year+1900,f->date.tm_mon,f->date.tm_mday);
+        }
+        return;
+    }
+    if (str!=NULL && is_comm_equals(str,"-free")){
+        deleteFromMemoryMmap(fich,L);
         return;
     }
     char *perm;
     void *p;
     int protection=0;
-    if (is_comm_equals(str,"-free")){
-        deleteFromMemoryMmap(fich,L);
-    }
-    if (strcmp(str2,"perm")!=0 && strlen(perm)<4) {
-        if (strchr(perm,'r')!=NULL) protection|=PROT_READ;
-        if (strchr(perm,'w')!=NULL) protection|=PROT_WRITE;
-        if (strchr(perm,'x')!=NULL) protection|=PROT_EXEC;
+
+    if (strcmp(str2,"perm")!=0 && strlen(str2)<4) {
+        if (strchr(str2,'r')!=NULL) protection|=PROT_READ;
+        if (strchr(str2,'w')!=NULL) protection|=PROT_WRITE;
+        if (strchr(str2,'x')!=NULL) protection|=PROT_EXEC;
     }
 
     if ((p=MmapFichero(str,protection,L))==NULL){
@@ -219,7 +230,7 @@ void main_shared(char* str,char* key, char* tam, MemList* L){
     if(is_comm_equals(str,"-create")){
         struct tMemory* item;
         description description1;
-        SharedCreate(str,key,L);
+        SharedCreate(key,tam,L);
         item=createItemMemo(str_to_int(tam,NULL));
         description1=createDescriptorShared((int)str_to_int(key,NULL));
         modifyItem(item,shared,description1);
@@ -232,7 +243,10 @@ void main_shared(char* str,char* key, char* tam, MemList* L){
         deleteFromMemoryShared(str_to_int(key,NULL),L);
     }
     else if(is_comm_void(str)){
-
+        MemPos p;
+        for(p=*L;p!=NULL;p=p->next){
+            if(p->typeId==shared)printf("%p: size:%ld. malloc %d-%02d-%02d \n",p->memdir,p->size,p->date.tm_year+1900,p->date.tm_mon,p->date.tm_mday);
+        }
     }
 
 

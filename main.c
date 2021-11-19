@@ -2,6 +2,7 @@
 /*@Alvaro revisa si el cambio char *str => char *str[] es correcto*/
 int main(){
     char aux[MAXTAML];
+    int count;
     tList hist, comando;
     MemList dynamic_memory;
     createEmptyList(&hist);
@@ -28,89 +29,113 @@ bool an_comm(tList L, tList *historia, MemList *dynamic_memory,bool check){
     tList temp;
     createEmptyList(&temp);
     if(is_comm_equals(L->data,"pid")) {
-        if(count_node(L->next)>2){
+        if(count_node(L->next)>1){
             check=false;
             a=2;
         }
         else a=pid(L->next->data);
     }
-    if(is_comm_equals(L->data,"autores")) {
-        if(count_node(L->next)>2){
+    else if(is_comm_equals(L->data,"autores")) {
+        if(count_node(L->next)>1){
             check=false;
             a=2;
         }
         else a=autores(L->next->data);
 
     }
-    if(is_comm_equals(L->data,"fecha")){
-        if(count_node(L->next)>2){
+    else if(is_comm_equals(L->data,"fecha")){
+        if(count_node(L->next)>1){
             check=false;
             a=2;
         }
         else a=fecha(L->next->data);
     }
-    if(is_comm_equals(L->data,"infosis")) {
-        if(count_node(L->next)>1){
+    else if(is_comm_equals(L->data,"infosis")) {
+        if(count_node(L->next)>0){
             check=false;
             a=2;
         }
         else a=infosis();
     }
-    if(is_comm_equals(L->data,"hist")) {
-        if(count_node(L->next)>2){
+    else if(is_comm_equals(L->data,"hist")) {
+        if(count_node(L->next)>1){
             check=false;
             a=2;
         }
         else a= historial(L->next->data,historia);
     }
-    if(is_comm_equals(L->data,"ayuda")) {
-        if(count_node(L->next)>2){
+    else if(is_comm_equals(L->data,"ayuda")) {
+        if(count_node(L->next)>1){
             check=false;
             a=2;
         }
         else
             a=ayuda(L->next->data);
     }
-    if(is_comm_equals(L->data,"carpeta")) {
-        if(count_node(L->next)>2){
+    else if(is_comm_equals(L->data,"carpeta")) {
+        if(count_node(L->next)>1){
             check=false;
             a=2;
         }
         else a=carpeta(L->next->data);
     }
-    if(is_comm_equals(L->data,"crear")) a= crear(L->next);
-    if(is_comm_equals(L->data,"listfich")) a= list_fich(L->next,&temp);
-    if(is_comm_equals(L->data,"listdir")) a= list_dir_up(L->next, &temp);
-    if(is_comm_equals(L->data,"borrar")) a= borrar(L->next);
-    if(is_comm_equals(L->data,"borrarrec")) a= borrarrec(L->next);
-    if(is_comm_equals(L->data,"malloc")){
-        if(count_node(L->next)==2){
+    else if(is_comm_equals(L->data,"crear")) a= crear(L->next);
+    else if(is_comm_equals(L->data,"listfich")) a= list_fich(L->next,&temp);
+    else if(is_comm_equals(L->data,"listdir")) a= list_dir_up(L->next, &temp);
+    else if(is_comm_equals(L->data,"borrar")) a= borrar(L->next);
+    else if(is_comm_equals(L->data,"borrarrec")) a= borrarrec(L->next);
+    else if(is_comm_equals(L->data,"malloc")){
+        if(count_node(L->next)<1){
+            malloc_general(FIN_COMM,FIN_COMM,dynamic_memory);
+        }
+        else if(count_node(L->next)==1){
             malloc_general(FIN_COMM,L->next->data,dynamic_memory);
         }
-        else if(count_node(L->next)==3){
+
+        else if(count_node(L->next)==2){
             malloc_general(L->next->data,L->next->next->data,dynamic_memory);
         }
     }
-    if(is_comm_equals(L->data,"dealloc")){
-        if(count_node(L->next)==2){
+    else if(is_comm_equals(L->data,"dealloc")){
+        if(count_node(L->next)==1){
             dealloc(FIN_COMM,&L->next,dynamic_memory);
         }
-        else if(count_node(L->next)==3){
+        else if(count_node(L->next)==2){
             dealloc(L->next->data,&L->next->next,dynamic_memory);
         }
     }
-    if(is_comm_equals(L->data,"shared")){
-        if(count_node(L->next)==2){
+    else if(is_comm_equals(L->data,"shared")){
+        if((a=count_node(L->next))==1){
             main_shared(FIN_COMM,L->next->data,L->next->next->data,dynamic_memory);
         }
-        else if(count_node(L->next)==3){
+        else if(a==2){
+            main_shared(L->next->data,L->next->next->data,L->next->next->next->data,dynamic_memory);
+        }
+        else if(a==3){
             main_shared(L->next->data,L->next->next->data,L->next->next->next->data,dynamic_memory);
         }
     }
-    if(is_comm_equals(L->data,"recursiva")){
+    else if(is_comm_equals(L->data,"mmap")){
+        if(count_node(L->next)==0){
+            Mmap(FIN_COMM,FIN_COMM,FIN_COMM,dynamic_memory);
+        }
+        if (count_node(L->next)==2){
+
+            if(is_comm_equals(L->next->data,"-free")){
+                Mmap(L->next->data,NULL,L->next->next->data,dynamic_memory);
+            }
+            else{
+                Mmap(L->next->data,L->next->next->data,L->next->data,dynamic_memory);
+            }
+            //Mmap(L->next->data,L->next->next->data,L->next->next->next->data,dynamic_memory);
+            //Mmap(L->next->next->data,L->next->next->next->data,L->next->data,dynamic_memory);
+        }
+    }
+
+    else if(is_comm_equals(L->data,"recursiva")){
         doRecursiva(L->next->data);
     }
-    if(is_comm_equals(L->data,"comando")) {
+    else if(is_comm_equals(L->data,"comando")) {
         tPosL p;
         p = comando(L->next->data, *historia);
         if (p == NULL) {

@@ -16,7 +16,7 @@ int count_node(tList L){
     tPosL p;
     int i=0;
     for(p=L;p!=NULL;p=p->next)i++;
-    return i;
+    return i-1;
 }
 
 
