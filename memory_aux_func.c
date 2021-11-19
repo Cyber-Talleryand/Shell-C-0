@@ -24,9 +24,8 @@ void deleteFromMemoryShared(long key, MemList *L){
 void deleteFromMemoryMmap(char* filename, MemList *L){
     MemPos p;
     for(p=*L;p!=MNULL;p=p->next){
-        if(p->typeId==shared && strcmp(p->info.file.filename,filename)==0){
+        if(p->typeId==mmap_id && strcmp(p->info.file.filename,filename)==0){
             deleteAtPositionMemo(p,L);
-            p=MNULL;
         }
     }
 }
