@@ -10,7 +10,7 @@ bool isEmptyListMemo(MemList L){
     return L==MNULL;
 }
 struct tMemory* createItemMemo(long size){
-    time_t t;
+    time_t t= time(NULL);
     void* alpha;
     struct tMemory* str_memo=malloc(sizeof(struct tMemory));
     struct tm tm = *localtime(&t);

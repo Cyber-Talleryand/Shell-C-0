@@ -223,7 +223,7 @@ and arg[1] is the permissions*/
     MemPos f;
     if(is_comm_void(fich)){
         for(f=*L;f!=NULL;f=f->next){
-            if(f->typeId==memo)printf("%p: size:%ld. malloc %d-%02d-%02d \n",f->memdir,f->size,f->date.tm_year+1900,f->date.tm_mon,f->date.tm_mday);
+            if(f->typeId==mmap_id)printf("%p: size:%ld. mmap %s (fd %i) %d-%02d-%02d \n",f->memdir,f->size,f->info.file.filename,f->info.file.fd,f->date.tm_year+1900,f->date.tm_mon,f->date.tm_mday);
         }
         return;
     }
@@ -243,8 +243,6 @@ and arg[1] is the permissions*/
     if ((p=MmapFichero(str,protection,L))==NULL){
         perror ("Imposible mapear fichero");
     }
-
-
     else{
         printf ("fichero %s mapeado en %p\n", str, p);
     }
