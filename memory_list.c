@@ -59,7 +59,10 @@ description createDescriptormmap(int fd, char* filename){
 
 void insertItemMemo(struct tMemory* item, MemList *L){
     MemPos p;
-    if(isEmptyListMemo(*L))*L=item;
+    if(isEmptyListMemo(*L)){
+        *L=item;
+        return;
+    }
     for(p=*L;p->next!=NULL;p=p->next);
     p->next=item;
 };
@@ -82,16 +85,26 @@ MemPos findSizeMemo(long size, MemList L){
 void* getItemMemo(MemPos p, MemList L) {
     return p;
 }
+MemPos prev_mem(MemPos p, MemList L){
+    if (L==p || p==MNULL ||isEmptyListMemo(L)){
+        return  MNULL;
+    }
+    else{
+        MemPos q;
+        for (q=L;q->next!=p;q=q->next);
+        return q;
+    }
+}
+
 void deleteAtPositionMemo(MemPos p,MemList *L){
     MemPos m,temp;
     if(p==MNULL) return;
-    for(m=*L;m!=MNULL && m->next->memdir!=p->memdir;m=m->next);
-    if(m->next->memdir==p->memdir){
-        temp=m->next;
-        m->next=p->next;
-        free(p->memdir);
-        free(temp);
+    if(prev_mem(p,*L)==MNULL){
+        (*L)=(*L)->next;
     }
+    else prev_mem(p,*L)->next=p->next;
+    free(p->memdir);
+    free(p);
 };
 
 
