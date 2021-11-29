@@ -84,6 +84,7 @@ bool isEmptyList(tList L){
 /*Se escoge el elemento de la posición introducida.*/
 char* getItem(tPosL p, tList L){
     if (!isEmptyList(L)) return p->data;
+    else return NULL;
 }
 
 /*Devuelve la posición del primer elemento de la lista.*/
@@ -140,8 +141,6 @@ void print_list(tList L,int i){
 }
 
 void inPrintList(tList L,char c[MAXTAML]){
-    int i=0;
-    char auxc[MAXTAML];
     tPosL aux;
     strcpy(c,L->data);
     for(aux=L->next;aux!=LNULL && (strcmp(aux->data,"-0")!=0 /*|| strcmp(aux->data,"")!=0*/);aux=aux->next){
@@ -151,7 +150,12 @@ void inPrintList(tList L,char c[MAXTAML]){
 }
 
 void deleteAtPosition(tPosL p, tList *L){
-    previous(p,*L)->next=p->next;
+    if(p==LNULL) return;
+    if(previous(p,*L)==LNULL){
+        p=*L;
+        (*L)=(*L)->next;
+    }
+    else previous(p,*L)->next=p->next;
     free(p);
 }
 

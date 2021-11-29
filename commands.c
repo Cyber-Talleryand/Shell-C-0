@@ -216,7 +216,7 @@ void ayuda_listfich(){
            "");
 }
 void ayuda_listdir(){
-    printf("");
+    printf(" ");
 }
 void ayuda_borrar(){
     printf("Borra los archivos o directorios vacíos indicados");
@@ -253,3 +253,11 @@ void an_list(tList* L,tList *temp,void (*function)(struct stat stats, tList *tem
     deleteList(temp);
 }
 
+void list_to_array(tList L, char* argv[]){
+    tPosL p;
+    int i=0;
+    for(p=L; is_comm_void(p->data);p=p->next){
+        argv[i]=p->data;
+        i++;
+    }
+}

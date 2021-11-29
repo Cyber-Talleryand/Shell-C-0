@@ -3,14 +3,11 @@
 //
 
 #include "memory_func.h"
-
-
+int v1,v2,v3;
 
 void malloc_general(char *str, char *size, MemList *dynamic_register){
     long i;
-    int in;
-    char *rubbish,input_list[MAX_AUX_COMM];
-    void *a;
+    char *rubbish;
     MemPos p;
     struct tMemory *item;
     if(is_comm_void(size)){
@@ -38,8 +35,6 @@ void malloc_general(char *str, char *size, MemList *dynamic_register){
     else{
         perror("Parámetros introducidos incorrectos");
     }
-
-
 }
 
 void dealloc(char *str, tList* list_memo, MemList* L){
@@ -314,6 +309,161 @@ void doRecursiva(char* n){
     recursiva_bottom((int)str_to_int(n,NULL));
 }
 
+int prememoria(tList L, MemList M){
+    bool blocks = true, vars = true, funcs = true, pmap = true;
+    if(strcmp(L->data, FIN_COMM) == 0 || findItem("-all", L) != NULL);
+    else {
+        if(findItem("-blocks", L) == NULL)
+            blocks = false;
+        if(findItem("-vars", L) == NULL)
+            vars = false;
+        if(findItem("-funcs", L) == NULL)
+            funcs = false;
+        if(findItem("-pmap", L) == NULL)
+            pmap = false;
+    }
+    memoria(blocks, vars, funcs, pmap, M);
+    return 0;
+}
 
+void memoria(bool b, bool v, bool f, bool p, MemList mL){
+    if(b)
+        print_memory_list(mL);
+    if(v){
+        int l1 = 0, l2 = 0, l3 = 0;
+        static int s1 = 0, s2 = 0, s3 = 0;
+        v1=0;v2=0;v3=0;
+        printf("\nVariables globales en: \t%p %p %p\nVariables estáticas en:\t%p %p %p\nVariables locales en: \t%p %p %p\n",
+               &v1, &v2, &v3, &s1, &s2, &s3, &l1, &l2, &l3);
+    }
+    if(f)
+        printf("\nFunciones en %p, %p y %p\n\n", autores, fecha, infosis);
+    if(p)
+        dopmap();
+}
+
+int prevolcarmem(tList L){
+    if(strcmp(L->next->data, FIN_COMM) == 0)
+        volcarmem(L->data, 25);
+    else
+        volcarmem(L->data, strtol(L->next->data, NULL, 10));
+    return 0;
+}
+
+void volcarmem(char *dir, int n){
+    char *p;
+    int j, t;
+    char abajo[25];
+    sscanf(dir, "%p", &p);
+    printf("Volcando %d bytes de memoria desde %s", n, dir);
+    for(int i = 0; i < n; i+=j){
+        t = 0;
+        for(j = 0; j < 25 && i+j < n; j++){
+            if(*p < 32)
+                printf("  ");
+            else
+                printf("  %c", *p);
+            abajo[j] = *p;
+            t++;
+            p++;
+        }
+        printf("\n");
+        for(int w = 0; w < t; w++)
+            printf(" %x", abajo[w]);
+        printf("\n");
+    }
+}
+
+int prellenarmem(tList L){
+    if(strcmp(L->next->data, FIN_COMM) == 0)
+        llenarmem(L->data, 128, "A");
+    else if(strcmp(L->next->next->data, FIN_COMM) == 0)
+        llenarmem(L->data, strtol(L->next->data, NULL, 10), "A");
+    else
+        llenarmem(L->data, strtol(L->next->data, NULL, 10), L->next->next->data);
+    return 0;
+}
+
+void llenarmem(char *dir, int n, char *byte){
+    char *aux;
+    char *p;
+    char by = strtol(byte, &aux, 0);
+    if(by == 0)
+        by = *aux;
+    sscanf(dir, "%p", &p);
+    printf("Llenando %d bytes con %c desde %p", n, by, p);
+    for(int i = 0; i < n; i++){
+        *p = by;
+        p++;
+    }
+}
+
+int esBase(tList L){
+    if(strcmp(L->data, FIN_COMM) == 0)
+        return 2;
+    else if(strcmp(L->data, "read") == 0)
+        return preRead(L->next);
+    else if(strcmp(L->data, "write") == 0)
+        return preWrite(L->next);
+    else
+        return 1;
+}
+
+int preRead(tList L){
+    if(count_node(L) < 2)
+        return 2;
+    es_read(L->data, L->next->data, strtol(L->next->next->data, NULL, 10));
+    return 0;
+}
+
+int preWrite(tList L){
+    int i = 3;
+    bool overwrite = false;
+    if(strcmp(L->data, "-o") == 0){
+        i = 4;
+        overwrite = true;
+    }
+    if(count_node(L) < i)
+        return 2;
+    es_write(L->data, L->next->data, strtol(L->next->next->data, NULL, 10), overwrite);
+    return 0;
+}
+
+void es_read(char *fich, char *dir, int n){
+    int fd = open(fich, O_RDONLY);
+    if(fd == -1){
+        perror(fich);
+        return;
+    }
+    if(n == 0){
+        struct stat structstat;
+        if(fstat(fd, &structstat) != 0){
+            perror(fich);
+            return;
+        }
+        n = structstat.st_size;
+    }
+    char *p;
+    sscanf(dir, "%p", &p);
+    read(fd, p, n);
+}
+
+void es_write(char *fich, char *dir, int n, bool o){
+    if(!o){
+        int f2;
+        f2 = open(fich, O_WRONLY);
+        close(f2);
+        if(f2 != -1)
+            return;
+    }
+    int fd = open(fich, O_CREAT|O_WRONLY);
+    if(fd == -1){
+        perror(fich);
+        return;
+    }
+    char *p;
+    sscanf(dir, "%p", &p);
+    write(fd, p, n);
+}
 
 

@@ -95,9 +95,9 @@ MemPos prev_mem(MemPos p, MemList L){
 }
 
 void deleteAtPositionMemo(MemPos p,MemList *L){
-    MemPos m,temp;
     if(p==MNULL) return;
     if(prev_mem(p,*L)==MNULL){
+        p=*L;
         (*L)=(*L)->next;
     }
     else prev_mem(p,*L)->next=p->next;

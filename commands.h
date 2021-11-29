@@ -52,6 +52,7 @@ void ayuda_ayuda();
 void an_list(tList* L,tList *temp,void (*function)(struct stat stats, tList *temp, char* name));
 void get_parameters(tList *L, tList M);
 long str_to_int(char* str, char* rubbish);
+void list_to_array(tList L, char* argv[]);
 
 
 #endif //SHELL_COMMANDS_H

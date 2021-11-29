@@ -1,8 +1,14 @@
+/*
+ * Rodrigo Gonzalez Mantuano r.d.gmantuano@udc.es
+ *
+ * David Alvarez Celemin
+ *
+ * */
+
 #include "func.h"
-/*@Alvaro revisa si el cambio char *str => char *str[] es correcto*/
+
 int main(){
     char aux[MAXTAML];
-    int count;
     tList hist, comando;
     MemList dynamic_memory;
     bool status=true;
@@ -140,6 +146,14 @@ bool an_comm(tList L, tList *historia, MemList *dynamic_memory,bool check){
     else if(is_comm_equals(L->data,"recursiva")){
         doRecursiva(L->next->data);
     }
+
+    else if(is_comm_equals(L->data,"memoria")) a= prememoria(L->next, (MemList)*dynamic_memory);
+        //else if(is_comm_equals(L->data,"recursiva")) a= prerrecursiva(L->next->data);
+    else if(is_comm_equals(L->data,"llenarmem")) a= prellenarmem(L->next);
+    else if(is_comm_equals(L->data,"volcarmem")) a= prevolcarmem(L->next);
+    else if(is_comm_equals(L->data,"e-s")) a= esBase(L->next);
+    else if((is_comm_equals(L->data,"priority")))priority(L->next->data,L->next->next->data);
+    else if((is_comm_equals(L->data,"environ"))) env();
     else if(is_comm_equals(L->data,"comando")) {
         tPosL p;
         p = comando(L->next->data, *historia);
@@ -169,24 +183,3 @@ bool an_comm(tList L, tList *historia, MemList *dynamic_memory,bool check){
     return true;
 
 }
-
-
-
-
-
-/*
-void leeCarpeta(char *str){
-    DIR *dirp;
-    struct dirent *e;
-    errno = 0;
-    if ((dirp = opendir(str)) == NULL) {
-        perror(str);
-        return;
-    }
-    while((e = readdir(dirp)) != NULL){
-        if((strcmp(e->d_name, ".") * strcmp(e->d_name, "..")) != 0){
-            //función
-        }
-    }
-}
-*/

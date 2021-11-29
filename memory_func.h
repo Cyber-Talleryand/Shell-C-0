@@ -29,4 +29,16 @@ void main_shared(char* str,char* key, char* tam, MemList* L);
 bool SharedCreate (char *str, char *str2,MemList* L);
 void doRecursiva (char *n);
 void recursiva_bottom(int n);
+int prememoria(tList L, MemList M);
+void memoria(bool b, bool v, bool f, bool p, MemList mL);
+int prevolcarmem(tList L);
+void volcarmem(char *dir, int n);
+int prellenarmem(tList L);
+void llenarmem(char *dir, int n, char *byte);
+int esBase(tList L);
+int preRead(tList L);
+int preWrite(tList L);
+void es_read(char *fich, char *dir, int n);
+void es_write(char *fich, char *dir, int n, bool o);
+
 #endif //SHELL_MEMORY_FUNC_H
