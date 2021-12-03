@@ -9,7 +9,7 @@
 #include "commands.h"
 #include "memory_func.h"
 #include "storage_mod.h"
-#include "proccess.h"
+#include "process.h"
 
 
 
@@ -20,7 +20,7 @@
 #define MAX_AUX_COMM 20
 #define LEERCOMPLETO ((ssize_t)-1)
 
-bool an_comm(tList L, tList *historia, MemList *dynamic_memory,bool check);
+bool an_comm(tList L, tList *historia, MemList *dynamic_memory, pidList *PL, bool check);
 
 
 #endif //P1_FUNC_H
