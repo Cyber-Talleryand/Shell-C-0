@@ -11,9 +11,11 @@ int main(){
     char aux[MAXTAML];
     tList hist, comando;
     MemList dynamic_memory;
+    pidList PL;
     bool status=true;
     createEmptyList(&hist);
     createEmptyMemoList(&dynamic_memory);
+    createEmptyListPid(&PL);
 
 
     do {
@@ -21,17 +23,18 @@ int main(){
         obt_com(&comando);
         inPrintList(comando,aux);
         insertItem(aux,&hist);
-        status=an_comm(comando, &hist, &dynamic_memory,true);
+        status=an_comm(comando, &hist, &dynamic_memory,&PL,true);
         deleteList(&comando);
         printf("\n");
         limpiar_string(aux,MAXTAML);
     }while(status);
     deleteList(&hist);
     deleteListMemo(&dynamic_memory);
+    deleteListPid(&PL);
 }
 
 
-bool an_comm(tList L, tList *historia, MemList *dynamic_memory,bool check){
+bool an_comm(tList L, tList *historia, MemList *dynamic_memory, pidList *PL, bool check){
     int a=1;
     tList temp;
     createEmptyList(&temp);
@@ -152,8 +155,23 @@ bool an_comm(tList L, tList *historia, MemList *dynamic_memory,bool check){
     else if(is_comm_equals(L->data,"llenarmem")) a= prellenarmem(L->next);
     else if(is_comm_equals(L->data,"volcarmem")) a= prevolcarmem(L->next);
     else if(is_comm_equals(L->data,"e-s")) a= esBase(L->next);
-    else if((is_comm_equals(L->data,"priority")))priority(L->next->data,L->next->next->data);
-    else if((is_comm_equals(L->data,"environ"))) env();
+    else if((is_comm_equals(L->data,"priority"))) priority(L->next);
+    else if((is_comm_equals(L->data,"fg")||is_comm_equals(L->data,"back")
+            || is_comm_equals(L->data,"fgpri")) || is_comm_equals(L->data,"backpri"))
+        argument_distribution(L->data,L,PL);
+    else if (is_comm_equals(L->data,"listjobs"))printlistpid(PL);
+    else if(is_comm_equals(L->data, "borraarjobs"))borrarjobs(L->next->data,PL);
+    else if(is_comm_equals(L->data,"job")) {
+        if(count_node(L->next)==0){
+            main_job(NULL,NULL,PL);
+        }
+        else if(count_node(L->next)==1){
+            main_job(NULL,L->next->data,PL);
+        }
+        else if(count_node(L->next)==2){
+            main_job(L->next->data,L->next->next->data,PL);
+        }
+    }
     else if(is_comm_equals(L->data,"comando")) {
         tPosL p;
         p = comando(L->next->data, *historia);
@@ -167,7 +185,7 @@ bool an_comm(tList L, tList *historia, MemList *dynamic_memory,bool check){
             if (!is_comm_equals(aux->data, "comando")) {
                 printf("%s\n", aux->data);
                 sleep(1);
-                an_comm(aux, historia, dynamic_memory,  false);
+                an_comm(aux, historia, dynamic_memory, PL,  false);
             } else {
                 a = 0;
                 printf("Estás intentando utilizar un \"comando\" que puede romper el programa");
