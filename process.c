@@ -234,9 +234,6 @@ void main_job(char *arg, char* cpid, pidList *L){
         printlistpid( &item);
         item->next=save;
     }
-    else if(){
-
-    }
     else if(is_comm_equals(arg,"-fg") && !is_comm_void(cpid)){
         foreground(&cpid);
     }
