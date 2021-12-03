@@ -7,21 +7,36 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+
 #define PNULL -1
 #define PLNULL NULL
-typedef struct t_Pid* pidPos;
+
+
+typedef struct job* pidPos;
+
+
+typedef struct jobdata{
+    id_t pid;
+    char* commmandline;
+    time_t time1;
+    int status;//running 1, exitted 0, lost -1
+    int val;//value of the exit(signal, exit value,...)
+}jobdata;
+
+typedef struct job{
+    jobdata data;
+    pidPos next;
+}job;
+
 
 typedef pidPos pidList;
 
-struct t_Pid{
-    pid_t proccess;
-    pidPos next;
-};
 
 void createEmptyListPid (pidList* L);
 int count_nodePid(pidList L);
 bool createNodePid (pidPos* p);
-bool insertItemPid(pid_t pid, pidList* L );
+bool insertItemPid(jobdata pid, pidList* L );
+
 pidPos findItemPid(pid_t pid, pidList L) ;
 bool isEmptyListPid(pidList L);
 pid_t getItemPid(pidPos p, pidList L);
@@ -31,6 +46,7 @@ pidPos previousPid(pidPos p, pidList L);
 void deleteListPid(pidList* L);
 void print_listPid(pidList L,int i);
 void deleteAtPositionPid(pidPos p, pidList *L);
+void deleteListPidCond(pidList *L,int comm, int arg, int arg2);
 
 
 #endif //SHELL_PROCC_LIST_H
