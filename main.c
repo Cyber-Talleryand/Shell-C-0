@@ -112,6 +112,25 @@ bool an_comm(tList L, tList *historia, MemList *dynamic_memory, pidList *PL, boo
     else if(is_comm_equals(L->data,"listdir")) a= list_dir_up(L->next, &temp);
     else if(is_comm_equals(L->data,"borrar")) a= borrar(L->next);
     else if(is_comm_equals(L->data,"borrarrec")) a= borrarrec(L->next);
+    else if(is_comm_equals(L->data,"fork")) a= doFork();
+    else if(is_comm_equals(L->data,"priority")) a= priority(L->next);
+    else if(is_comm_equals(L->data,"rederr")) a= rederr(L->next->data);
+    else if(is_comm_equals(L->data,"uid")) a= uid(L->next);
+    else if(is_comm_equals(L->data,"entorno")) a= entorno(L->next->data, main3);
+    else if(is_comm_equals(L->data,"mostrarvar")) a= mostrarvar(L->next->data, main3);
+    else if(is_comm_equals(L->data,"cambiarvar")) a= cambiarvar(L->next, main3);
+    else if(is_comm_equals(L->data, "borraarjobs")) a= borrarjobs(L->next->data,PL);
+    else if(is_comm_equals(L->data,"job")) {
+        if(count_node(L->next)==0){
+            a= doJob(NULL,NULL,PL);
+        }
+        else if(count_node(L->next)==1){
+            a= doJob(NULL,L->next->data,PL);
+        }
+        else if(count_node(L->next)==2){
+            a= doJob(L->next->data,L->next->next->data,PL);
+        }
+    }
     else if(is_comm_equals(L->data,"malloc")){
         if(count_node(L->next)==0){
             malloc_general(FIN_COMM,FIN_COMM,dynamic_memory);
