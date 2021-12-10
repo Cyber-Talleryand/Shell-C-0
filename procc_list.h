@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <time.h>
 
 #define PNULL -1
 #define PLNULL NULL
@@ -18,7 +19,7 @@ typedef struct job* pidPos;
 typedef struct jobdata{
     id_t pid;
     char* commmandline;
-    time_t time1;
+    struct tm time1;
     int status;//running 1, exitted 0, lost -1
     int val;//value of the exit(signal, exit value,...)
 }jobdata;
@@ -39,8 +40,8 @@ bool insertItemPid(jobdata pid, pidList* L );
 
 pidPos findItemPid(pid_t pid, pidList L) ;
 bool isEmptyListPid(pidList L);
-pid_t getItemPid(pidPos p, pidList L);
-pidPos firstPid(pidList L);
+//pid_t getItemPid(pidPos p, pidList L);
+//pidPos firstPid(pidList L);
 pidPos lastPid(pidList L);
 pidPos previousPid(pidPos p, pidList L);
 void deleteListPid(pidList* L);

@@ -19,7 +19,7 @@ int borrarrec(tList L);
 int crear(tList L);
 int crear_x(tList L,bool check);
 void sym_link();
-char * ConvierteModo (mode_t m, char *permisos);
+//char * ConvierteModo (mode_t m, char *permisos);
 int list_fich(tList L, tList *temp);
 int list_fich(tList L,tList *temp);
 int list_dir_up(tList L,tList *temp);

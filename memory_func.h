@@ -18,7 +18,7 @@
 #define TAMANO 4096
 
 
-ssize_t LeerFichero (char *fich, void *p, ssize_t n);
+//ssize_t LeerFichero (char *fich, void *p, ssize_t n);
 void * MmapFichero (char * fichero, int protection,MemList *L);
 void Mmap (char *str, char* str2, char *fich, MemList *L);
 void * ObtenerMemoriaShmget (key_t clave, size_t tam, MemList* L);

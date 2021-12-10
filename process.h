@@ -15,6 +15,10 @@ struct SEN{
     char *nombre;
     int senal;
 };
+
+void printlistpid1(pidList *L);
+void borrarjobs1(char* command, pidList *L);
+
 static struct SEN sigstrnum[]={
         "HUP", SIGHUP,
         "INT", SIGINT,
@@ -100,7 +104,7 @@ void foreground(char* argv[]);
 void background(char* argv[], pidList *L);
 void foregroundpri(char* argv[], pidList *L);
 void backgroundpri(char* argv[], pidList *L);
-void printlistpid(pidList *L);
-void borrarjobs(char* command, pidList *L);
 void main_job(char *arg, char* cpid, pidList *L);
+void ejec(char* argv[]);
+
 #endif //SHELL_PROCESS_H

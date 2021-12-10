@@ -42,13 +42,14 @@ int priority(tList L){
 }
 
 int entorno(char *str, char **env){
-    if(strcmp(str, FIN_COMM) == 0)
+    
+    if(is_comm_void(str))
         for(int i = 0; env[i] != NULL; i++)
             printf("%s\n", env[i]);
-    else if(strcmp(str, "-environ") == 0)
+    else if(is_comm_equals(str, "-environ"))
         for(int i = 0; environ[i] != NULL; i++)
             printf("%s\n", environ[i]);
-    else if(strcmp(str, "-addr") == 0){
+    else if(is_comm_equals(str, "-addr")){
         printf("environ = %p guardada en %p\n", environ, &environ);
         printf("arg3 = %p guardada en %p\n", env, &env);
     }else
@@ -97,10 +98,14 @@ void set_prio_aux(int who, int prio){
 }
 
 bool saveinfopid(int pid,char* exec, pidList *L){
+    char save;
+    strcpy(&save,exec);
+    time_t t=time(NULL);
+    struct tm tm=*localtime(&t);
     struct jobdata d;
     d.pid=pid;
-    d.commmandline=exec;
-    d.time1=time(NULL);
+    d.commmandline=&save;
+    d.time1=tm;
     return insertItemPid(d,L);
 }
 
@@ -139,8 +144,12 @@ void argument_distribution(char *comm,tList L,pidList *PL){
     else if(is_comm_equals(comm,"back"))background(argv,PL);
     else if(is_comm_equals(comm,"fgpri"))foregroundpri(argv,PL);
     else if(is_comm_equals(comm,"backpri"))backgroundpri(argv,PL);
+    else if(is_comm_equals(comm, "ejec")) ejec(argv,PL);
 }
 
+void ejec(char* argv[]){
+    execvp(argv[0], argv);
+}
 
 void foreground(char* argv[]){
     int pid1;
@@ -159,7 +168,7 @@ void background(char* argv[], pidList *L){
         exit(0);
         //borrar info background
     }
-    saveinfopid(pid1,argv[0],L);
+    saveinfopid(pid1,argv[2],L);
     //guardar
 
 
@@ -175,40 +184,36 @@ void backgroundpri(char* argv[], pidList *L){
     set_prio_aux(pid(NULL),0);
 }
 
-void printlistpid(pidList *L){
+void printlistpid1(pidList *L){
     pidPos p;
     int sstatus,value;
     char* stop[1];
     char* pidaux="0000000";
     for(p=*L;p!=NULL;p=p->next){
-        stop[0]="kill -stop ";
-        sprintf(pidaux,"%d",p->data.pid);
-        strcat(*stop,pidaux);
-        foreground(stop);
+        //kill(p->data.pid,SIGSTOP);
         if(waitpid(p->data.pid,&sstatus,WNOHANG | WUNTRACED | WCONTINUED)==p->data.pid){
             //put else if for prio
 
-            printf("pid %i: prio: %s user: %s command: %s time: %li",p->data.pid,
-                   /*getpriority(PRIO_PROCESS,p->data.pid)*/"a",
-                   /*getuid()*/"a",p->data.commmandline,p->data.time1);
+            printf("pid %i: prio: %d user: %s command: %s time: %d:%d:%d",p->data.pid,
+                   getpriority(PRIO_PROCESS,p->data.pid),
+                   /*getuid()*/"a",p->data.commmandline,p->data.time1.tm_hour,
+                   p->data.time1.tm_min,p->data.time1.tm_sec);
             printf("status: %s", NombreSenal(sstatus));
+            getchar();
             if(waitpid(p->data.pid,NULL, WIFEXITED(sstatus))) {
                 p->data.val=waitpid(p->data.pid,NULL, WEXITSTATUS(sstatus));
                 printf("value: %i", p->data.val );
             }
 
-
-            stop[0]="kill -cont ";
-            sprintf(pidaux,"%d",p->data.pid);
-            strcat(*stop,pidaux);
-        };
+          //  kill(p->data.pid,SIGCONT);
+        }
 
         //continue command
 
     }
 
 }
-void borrarjobs(char* command, pidList *L){
+void borrarjobs1(char* command, pidList *L){
     if(is_comm_equals(command,"-term")){
         deleteListPidCond(L,0,SIGTERM,0);
     }
@@ -226,18 +231,19 @@ void main_job(char *arg, char* cpid, pidList *L){
     long pid= str_to_int(cpid,NULL);
     pidPos item,save;
     if(is_comm_void(cpid) || (item=findItemPid((int)pid,*L))==PLNULL){
-        printlistpid(L);
+        printlistpid1(L);
     }
     else if(is_comm_void(arg)){
         save=item->next;
         item->next=PLNULL;
-        printlistpid( &item);
+        printlistpid1( &item);
         item->next=save;
     }
     else if(is_comm_equals(arg,"-fg") && !is_comm_void(cpid)){
         foreground(&cpid);
     }
-
-
 }
 
+//traer proceso hacie delante
+
+//por que kill en listjobs

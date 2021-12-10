@@ -5,7 +5,25 @@
  *
  * */
 
-#include "func.h"
+//#include "func.h"
+#include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
+#include <dirent.h>
+#include "memory_list.h"
+#include "commands.h"
+#include "memory_func.h"
+#include "storage_mod.h"
+#include "process.h"
+
+
+#define MAX_AUX_COMM 20
+#define LEERCOMPLETO ((ssize_t)-1)
+
+
+
+bool an_comm(tList L, tList *historia, MemList *dynamic_memory, pidList *PL, bool check);
+bool an_comm_pr(tList L, tList *historia, MemList *dynamic_memory, pidList *PL, bool check);
 
 int main(){
     char aux[MAXTAML];
@@ -155,23 +173,6 @@ bool an_comm(tList L, tList *historia, MemList *dynamic_memory, pidList *PL, boo
     else if(is_comm_equals(L->data,"llenarmem")) a= prellenarmem(L->next);
     else if(is_comm_equals(L->data,"volcarmem")) a= prevolcarmem(L->next);
     else if(is_comm_equals(L->data,"e-s")) a= esBase(L->next);
-    else if((is_comm_equals(L->data,"priority"))) priority(L->next);
-    else if((is_comm_equals(L->data,"fg")||is_comm_equals(L->data,"back")
-            || is_comm_equals(L->data,"fgpri")) || is_comm_equals(L->data,"backpri"))
-        argument_distribution(L->data,L,PL);
-    else if (is_comm_equals(L->data,"listjobs"))printlistpid(PL);
-    else if(is_comm_equals(L->data, "borraarjobs"))borrarjobs(L->next->data,PL);
-    else if(is_comm_equals(L->data,"job")) {
-        if(count_node(L->next)==0){
-            main_job(NULL,NULL,PL);
-        }
-        else if(count_node(L->next)==1){
-            main_job(NULL,L->next->data,PL);
-        }
-        else if(count_node(L->next)==2){
-            main_job(L->next->data,L->next->next->data,PL);
-        }
-    }
     else if(is_comm_equals(L->data,"comando")) {
         tPosL p;
         p = comando(L->next->data, *historia);
@@ -193,6 +194,7 @@ bool an_comm(tList L, tList *historia, MemList *dynamic_memory, pidList *PL, boo
             deleteList(&aux);
         }
     }
+    else an_comm_pr(L,historia,dynamic_memory,PL,check);
     deleteList(&temp);
     if (is_comm_equals(L->data, "fin") || is_comm_equals(L->data, "salir") || is_comm_equals(L->data, "bye"))
         return false;
@@ -200,4 +202,35 @@ bool an_comm(tList L, tList *historia, MemList *dynamic_memory, pidList *PL, boo
     if(a==1 && !check) printf("No se ha introducido ningún comando válido");
     return true;
 
+}
+
+
+bool an_comm_pr(tList L, tList *historia, MemList *dynamic_memory, pidList *PL, bool check){
+    if((is_comm_equals(L->data,"priority"))) priority(L->next);
+    else if((is_comm_equals(L->data,"fg")||is_comm_equals(L->data,"back")
+             || is_comm_equals(L->data,"fgpri")) || is_comm_equals(L->data,"backpri"))
+        argument_distribution(L->data,L,PL);
+
+    else if (is_comm_equals(L->data,"entorno")){
+        if(count_node(L->next)==0){
+            entorno(NULL,environ);
+        }
+        else if(count_node(L->next)==1)entorno(L->next->data,environ);
+
+            //Aqui hay que revisar
+        else entorno(L->next->data,/*(L->next->next)->data)*/environ);
+    }
+    else if(is_comm_equals(L->data, "borraarjobs"))borrarjobs1(L->next->data,PL);
+    else if (is_comm_equals(L->data,"listjobs"))printlistpid1(PL);
+    else if(is_comm_equals(L->data,"job")) {
+        if(count_node(L->next)==0){
+            main_job(NULL,NULL,PL);
+        }
+        else if(count_node(L->next)==1){
+            main_job(NULL,L->next->data,PL);
+        }
+        else if(count_node(L->next)==2){
+            main_job(L->next->data,L->next->next->data,PL);
+        }
+    }
 }
