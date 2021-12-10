@@ -52,7 +52,8 @@ int entorno(char *str, char **env){
     else if(is_comm_equals(str, "-addr")){
         printf("environ = %p guardada en %p\n", environ, &environ);
         printf("arg3 = %p guardada en %p\n", env, &env);
-    }else
+    }
+    else
         return 2;
     return 0;
 }
@@ -144,7 +145,7 @@ void argument_distribution(char *comm,tList L,pidList *PL){
     else if(is_comm_equals(comm,"back"))background(argv,PL);
     else if(is_comm_equals(comm,"fgpri"))foregroundpri(argv,PL);
     else if(is_comm_equals(comm,"backpri"))backgroundpri(argv,PL);
-    else if(is_comm_equals(comm, "ejec")) ejec(argv,PL);
+    else if(is_comm_equals(comm, "ejec")) ejec(argv);
 }
 
 void ejec(char* argv[]){
@@ -162,7 +163,6 @@ void foreground(char* argv[]){
 void background(char* argv[], pidList *L){
     int pid1;
     if((pid1=fork())==0){
-
         execvp(argv[0],argv);
         //guardar info de background
         exit(0);
@@ -178,6 +178,7 @@ void foregroundpri(char* argv[],pidList *L){
     foreground(argv);
     set_prio_aux(pid(NULL),0);
 }
+
 void backgroundpri(char* argv[], pidList *L){
     set_prio_aux(pid(NULL),-20);
     background(argv,L);
@@ -188,15 +189,35 @@ void printlistpid1(pidList *L){
     pidPos p;
     int sstatus,value;
     char* stop[1];
-    char* pidaux="0000000";
+    int pidaux;
     for(p=*L;p!=NULL;p=p->next){
-        //kill(p->data.pid,SIGSTOP);
+
+        pidaux = waitpid( p->data.pid, &sstatus, WNOHANG|WUNTRACED|WCONTINUED);
+        if (pidaux > 0)
+        {
+            printf("pid %i: prio: %d user: %s command: %s time: %d:%d:%d",p->data.pid,
+                   getpriority(PRIO_PROCESS,p->data.pid),
+                    //getuid()
+                   "a"
+                    ,p->data.commmandline,p->data.time1.tm_hour,
+                   p->data.time1.tm_min,p->data.time1.tm_sec);
+            printf("status: %s", NombreSenal(sstatus));
+            if (WIFEXITED(sstatus)) {
+                printf("Child exited with RC=%d\n",WEXITSTATUS(sstatus));
+            }
+            if (WIFSIGNALED(sstatus)) {
+                printf("Child exited via signal %d\n",WTERMSIG(sstatus));
+            }
+        }
+        /*kill(p->data.pid,SIGSTOP);
         if(waitpid(p->data.pid,&sstatus,WNOHANG | WUNTRACED | WCONTINUED)==p->data.pid){
             //put else if for prio
 
             printf("pid %i: prio: %d user: %s command: %s time: %d:%d:%d",p->data.pid,
                    getpriority(PRIO_PROCESS,p->data.pid),
-                   /*getuid()*/"a",p->data.commmandline,p->data.time1.tm_hour,
+                   //getuid()
+                   "a"
+                   ,p->data.commmandline,p->data.time1.tm_hour,
                    p->data.time1.tm_min,p->data.time1.tm_sec);
             printf("status: %s", NombreSenal(sstatus));
             getchar();
@@ -205,14 +226,13 @@ void printlistpid1(pidList *L){
                 printf("value: %i", p->data.val );
             }
 
-          //  kill(p->data.pid,SIGCONT);
+            kill(p->data.pid,SIGCONT);*/
         }
 
         //continue command
 
     }
 
-}
 void borrarjobs1(char* command, pidList *L){
     if(is_comm_equals(command,"-term")){
         deleteListPidCond(L,0,SIGTERM,0);
