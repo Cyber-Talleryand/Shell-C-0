@@ -323,9 +323,9 @@ void foregroundpri(char* prio,char* argv[],pidList *L){
     int b;
     b= getpriority(PRIO_PROCESS, getpid());
     i=str_to_int(prio,NULL);
-    set_prio_aux(pid(NULL),i);
+    set_prio_aux(getpid(),i);
     foreground(argv);
-    set_prio_aux(pid(NULL),b);
+    set_prio_aux(getpid(),b);
 
 
 }
@@ -335,18 +335,18 @@ void backgroundpri(char* prio,char* argv[], pidList *L){
     int b;
     b= getpriority(PRIO_PROCESS, getpid());
     i=str_to_int(prio,NULL);
-    set_prio_aux(pid(NULL),i);
+    set_prio_aux(getpid(),i);
     background(argv,L);
-    set_prio_aux(pid(NULL),b);
+    set_prio_aux(getpid(),b);
 }
 void ejecpri1(char *prio,char* argv[], pidList* L){
     long i;
     int b;
     b= getpriority(PRIO_PROCESS, getpid());
     i=str_to_int(prio,NULL);
-    set_prio_aux(pid(NULL),i);
+    set_prio_aux(getpid(),i);
     ejec1(argv);
-    set_prio_aux(pid(NULL),b);
+    set_prio_aux(getpid(),b);
 }
 char * NombreUsuario (uid_t uid)
 {
