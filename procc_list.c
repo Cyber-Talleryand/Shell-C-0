@@ -1,8 +1,9 @@
 //
-// Created by t_hss3 on 29/11/21.
+// Created by t_hss3 on 10/12/21.
 //
 
 #include "procc_list.h"
+
 void createEmptyListPid (pidList* L){
     *L=PLNULL;
 }

@@ -1,23 +1,30 @@
 //
-// Created by t_hss3 on 29/11/21.
+// Created by t_hss3 on 10/12/21.
 //
 
 #ifndef SHELL_PROCESS_H
 #define SHELL_PROCESS_H
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <string.h>
+#include <sys/time.h>
+#include <sys/wait.h>
 #include <sys/resource.h>
+#include <dirent.h>
+#include <sys/types.h>
+#include <pwd.h>
+
+#include "dynamic_list.h"
 #include "commands.h"
 #include "procc_list.h"
-#include <unistd.h>
-#include <signal.h>
-#include <wait.h>
-extern char **environ;
-struct SEN{
+
+extern char** environ;
+
+typedef struct SEN{
     char *nombre;
     int senal;
-};
-
-void printlistpid1(pidList *L);
-void borrarjobs1(char* command, pidList *L);
+}SEN;
 
 static struct SEN sigstrnum[]={
         "HUP", SIGHUP,
@@ -49,7 +56,6 @@ static struct SEN sigstrnum[]={
         "PROF", SIGPROF,
         "WINCH", SIGWINCH,
         "IO", SIGIO,
-
         "SYS", SIGSYS,
 /*senales que no hay en todas partes*/
 #ifdef SIGPOLL
@@ -91,20 +97,45 @@ static struct SEN sigstrnum[]={
         NULL,-1,
 }; /*fin array sigstrnum */
 
+
+typedef enum prious{PRIO, USER, NO}prious;
+
 int priority(tList L);
 int doFork();
 int rederr(char *str);
 int entorno(char *str, char **env);
 int mostrarvar(char *str, char **env);
-int precambiarvar(tList L, char **env);
 int cambiarvar(tList L, char **env);
-//bool saveinfopid(int pid, pidList *L);
+int preEjecNo(tList L, void (*fEjec)(prious, char*, char**, char*, char**));
+int preEjecPrious(tList L, void (*fEjec)(prious, char*, char**, char*, char**));
+void ejec(prious tipo, char* val, char** vars, char* prog, char** arg);
+void fg(prious tipo, char* val, char** vars, char* prog, char** arg);
+void back(prious tipo, char* val, char** vars, char* prog, char** arg);
+void ejecpri(prious tipo, char* val, char** vars, char* prog, char** arg);
+void ejecas(prious tipo, char* val, char** vars, char* prog, char** arg);
+void fgpri(prious tipo, char* val, char** vars, char* prog, char** arg);
+void fgas(prious tipo, char* val, char** vars, char* prog, char** arg);
+void backpri(prious tipo, char* val, char** vars, char* prog, char** arg);
+void backas(prious tipo, char* val, char** vars, char* prog, char** arg);
+int uid(tList L);
+void uidGet();
+void uidSetU(char *user);
+void uidSetId(int uid);
+int listjobs(pidList pL);
+int borrarjobs(char* command, pidList *L);
+int doJob(char *arg, char* cpid, pidList *L);
+bool saveinfopid(int pid,char* exec, pidList *L);
 void argument_distribution(char *comm,tList L,pidList *PL);
 void foreground(char* argv[]);
 void background(char* argv[], pidList *L);
-void foregroundpri(char* argv[], pidList *L);
-void backgroundpri(char* argv[], pidList *L);
+void foregroundpri(char *prio,char* argv[], pidList *L);
+void backgroundpri(char *prio,char* argv[], pidList *L);
+void ejec1(char* argv[]);
+void ejecas1(char *user,char* argv[], pidList *L);
+void backgroundas(char *user,char* argv[], pidList *L);
+void foregroundas(char *user,char* argv[], pidList *L);
+void ejecpri1(char *prio,char* argv[], pidList *L);
+void argument_distribution_plus(char *comm,tList L,pidList *PL);
+void printlistpid(pidList *L);
 void main_job(char *arg, char* cpid, pidList *L);
-void ejec(char* argv[]);
-
 #endif //SHELL_PROCESS_H

@@ -291,57 +291,6 @@ ssize_t LeerFichero (char *fich, void *p, ssize_t n)
     return (nleidos);
 }
 
-
-
-void recursiva_bottom (int n)
-{
-    char automatico[TAMANO];
-    static char estatico[TAMANO];
-    printf ("parametro n:%d en %p\n",n,&n);
-    printf ("array estatico en:%p \n",estatico);
-    printf ("array automatico en %p\n\n",automatico);
-    n--;
-    if (n>0)
-        recursiva_bottom(n);
-}
-
-void doRecursiva(char* n){
-    recursiva_bottom((int)str_to_int(n,NULL));
-}
-
-int prememoria(tList L, MemList M){
-    bool blocks = true, vars = true, funcs = true, pmap = true;
-    if(strcmp(L->data, FIN_COMM) == 0 || findItem("-all", L) != NULL);
-    else {
-        if(findItem("-blocks", L) == NULL)
-            blocks = false;
-        if(findItem("-vars", L) == NULL)
-            vars = false;
-        if(findItem("-funcs", L) == NULL)
-            funcs = false;
-        if(findItem("-pmap", L) == NULL)
-            pmap = false;
-    }
-    memoria(blocks, vars, funcs, pmap, M);
-    return 0;
-}
-
-void memoria(bool b, bool v, bool f, bool p, MemList mL){
-    if(b)
-        print_memory_list(mL);
-    if(v){
-        int l1 = 0, l2 = 0, l3 = 0;
-        static int s1 = 0, s2 = 0, s3 = 0;
-        v1=0;v2=0;v3=0;
-        printf("\nVariables globales en: \t%p %p %p\nVariables estáticas en:\t%p %p %p\nVariables locales en: \t%p %p %p\n",
-               &v1, &v2, &v3, &s1, &s2, &s3, &l1, &l2, &l3);
-    }
-    if(f)
-        printf("\nFunciones en %p, %p y %p\n\n", autores, fecha, infosis);
-    if(p)
-        dopmap();
-}
-
 int prevolcarmem(tList L){
     if(strcmp(L->next->data, FIN_COMM) == 0)
         volcarmem(L->data, 25);
@@ -467,3 +416,51 @@ void es_write(char *fich, char *dir, int n, bool o){
 }
 
 
+void recursiva_bottom (int n)
+{
+    char automatico[TAMANO];
+    static char estatico[TAMANO];
+    printf ("parametro n:%d en %p\n",n,&n);
+    printf ("array estatico en:%p \n",estatico);
+    printf ("array automatico en %p\n\n",automatico);
+    n--;
+    if (n>0)
+        recursiva_bottom(n);
+}
+
+void doRecursiva(char* n){
+    recursiva_bottom((int)str_to_int(n,NULL));
+}
+
+int prememoria(tList L, MemList M){
+    bool blocks = true, vars = true, funcs = true, pmap = true;
+    if(strcmp(L->data, FIN_COMM) == 0 || findItem("-all", L) != NULL);
+    else {
+        if(findItem("-blocks", L) == NULL)
+            blocks = false;
+        if(findItem("-vars", L) == NULL)
+            vars = false;
+        if(findItem("-funcs", L) == NULL)
+            funcs = false;
+        if(findItem("-pmap", L) == NULL)
+            pmap = false;
+    }
+    memoria(blocks, vars, funcs, pmap, M);
+    return 0;
+}
+
+void memoria(bool b, bool v, bool f, bool p, MemList mL){
+    if(b)
+        print_memory_list(mL);
+    if(v){
+        int l1 = 0, l2 = 0, l3 = 0;
+        static int s1 = 0, s2 = 0, s3 = 0;
+        v1=0;v2=0;v3=0;
+        printf("\nVariables globales en: \t%p %p %p\nVariables estáticas en:\t%p %p %p\nVariables locales en: \t%p %p %p\n",
+               &v1, &v2, &v3, &s1, &s2, &s3, &l1, &l2, &l3);
+    }
+    if(f)
+        printf("\nFunciones en %p, %p y %p\n\n", autores, fecha, infosis);
+    if(p)
+        dopmap();
+}

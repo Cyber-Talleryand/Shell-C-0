@@ -23,7 +23,7 @@
 
 
 bool an_comm(tList L, tList *historia, MemList *dynamic_memory, pidList *PL, bool check);
-bool an_comm_pr(tList L, tList *historia, MemList *dynamic_memory, pidList *PL, bool check);
+
 
 int main(){
     char aux[MAXTAML];
@@ -174,10 +174,11 @@ bool an_comm(tList L, tList *historia, MemList *dynamic_memory, pidList *PL, boo
     else if(is_comm_equals(L->data,"volcarmem")) a= prevolcarmem(L->next);
     else if(is_comm_equals(L->data,"e-s")) a= esBase(L->next);
     else if((is_comm_equals(L->data,"priority"))) priority(L->next);
-    else if((is_comm_equals(L->data,"fg")||is_comm_equals(L->data,"back")
-             || is_comm_equals(L->data,"fgpri")) || is_comm_equals(L->data,"backpri")
-             || is_comm_equals(L->data,"ejec"))
+    else if((is_comm_equals(L->data,"fg")||is_comm_equals(L->data,"back")))
         argument_distribution(L->data,L,PL);
+    else if((is_comm_equals(L->data,"fgas")||is_comm_equals(L->data,"backas")
+             || is_comm_equals(L->data,"fgpri")) || is_comm_equals(L->data,"backpri"))
+        argument_distribution_plus(L->data,L,PL);
 
     else if (is_comm_equals(L->data,"entorno")){
         if(count_node(L->next)==0){
@@ -188,8 +189,8 @@ bool an_comm(tList L, tList *historia, MemList *dynamic_memory, pidList *PL, boo
             //Aqui hay que revisar
         else entorno(L->next->data,/*(L->next->next)->data)*/environ);
     }
-    else if(is_comm_equals(L->data, "borraarjobs"))borrarjobs1(L->next->data,PL);
-    else if (is_comm_equals(L->data,"listjobs"))printlistpid1(PL);
+    else if(is_comm_equals(L->data, "borraarjobs"))borrarjobs(L->next->data,PL);
+    else if (is_comm_equals(L->data,"listjobs"))printlistpid(PL);
     else if(is_comm_equals(L->data,"job")) {
         if(count_node(L->next)==0){
             main_job(NULL,NULL,PL);
