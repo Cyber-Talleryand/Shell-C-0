@@ -277,6 +277,22 @@ void argument_distribution_plus(char *comm,tList L,pidList *PL) {
 void ejec1(char* argv[]){
     execvp(argv[0], argv);
 }
+void ejec_fin(tList L, pidList *PL){
+    tPosL p;
+    char *argv[3]={
+            "/bin/bash",
+            "-c",
+            L->data,
+    };
+
+
+    for(p=L->next; !is_comm_void(p->data);p=p->next) {
+        strcat(argv[2], " ");
+        strcat(argv[2],p->data);
+
+    }
+    background(argv,PL);
+}
 
 void foreground(char* argv[]){
     int pid1;
@@ -399,9 +415,28 @@ void printlistpid(pidList *L){
     pidPos p;
     int sstatus,value;
     char* stop[1];
-    char* pidaux="0000000";
+    int pidaux;
     for(p=*L;p!=NULL;p=p->next){
-        stop[0]="kill -stop ";
+
+
+        pidaux = waitpid( p->data.pid, &sstatus, WNOHANG|WUNTRACED|WCONTINUED);
+        if (pidaux > 0)
+        {
+            printf("pid %i: prio: %d user: %s command: %s time: %d:%d:%d",p->data.pid,
+                   getpriority(PRIO_PROCESS,p->data.pid),
+                    //getuid()
+                   "a"
+                    ,p->data.commmandline,p->data.time1.tm_hour,
+                   p->data.time1.tm_min,p->data.time1.tm_sec);
+            printf("status: %s", NombreSenal(sstatus));
+            if (WIFEXITED(sstatus)) {
+                printf("Child exited with RC=%d\n",WEXITSTATUS(sstatus));
+            }
+            if (WIFSIGNALED(sstatus)) {
+                printf("Child exited via signal %d\n",WTERMSIG(sstatus));
+            }
+        }
+        /*stop[0]="kill -stop ";
         sprintf(pidaux,"%d",p->data.pid);
         strcat(*stop,pidaux);
         //foreground(stop);
@@ -409,22 +444,22 @@ void printlistpid(pidList *L){
             //put else if for prio
 
             printf("pid %i: prio: %s user: %s command: %s time: %li",p->data.pid,
-                    /*getpriority(PRIO_PROCESS,p->data.pid)*/"a",
-                    /*getuid()*/"a",p->data.commmandline,p->data.time1);
-            printf("status: %s", NombreSenal(sstatus));
+                    *//*getpriority(PRIO_PROCESS,p->data.pid)"a",*/
+                    /*getuid()*/ //"a"/ ,p->data.commmandline,p->data.time1);
+            /*printf("status: %s", NombreSenal(sstatus));
             if(waitpid(p->data.pid,NULL, WIFEXITED(sstatus))) {
                 p->data.val=waitpid(p->data.pid,NULL, WEXITSTATUS(sstatus));
                 printf("value: %i", p->data.val );
             }
             stop[0]="kill -cont ";
             sprintf(pidaux,"%d",p->data.pid);
-            strcat(*stop,pidaux);
+            strcat(*stop,pidaux);*/
         };
 
         //continue command
 
     }
-}
+
 /*
 int listjobs(pidList pL){
 	printlistpid(&pL);

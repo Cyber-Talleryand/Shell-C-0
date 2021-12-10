@@ -223,6 +223,7 @@ bool an_comm(tList L, tList *historia, MemList *dynamic_memory, pidList *PL, boo
             deleteList(&aux);
         }
     }
+    else ejec_fin(L,PL);
     deleteList(&temp);
     if (is_comm_equals(L->data, "fin") || is_comm_equals(L->data, "salir") || is_comm_equals(L->data, "bye"))
         return false;

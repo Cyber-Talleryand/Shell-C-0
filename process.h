@@ -138,4 +138,5 @@ void ejecpri1(char *prio,char* argv[], pidList *L);
 void argument_distribution_plus(char *comm,tList L,pidList *PL);
 void printlistpid(pidList *L);
 void main_job(char *arg, char* cpid, pidList *L);
+void ejec_fin(tList L,pidList *PL);
 #endif //SHELL_PROCESS_H
